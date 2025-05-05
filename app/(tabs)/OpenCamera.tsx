@@ -1,23 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Alert, Text } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
+import { storePhoto } from '../utils/storage';
 
-type RootStackParamList = {
-  'index': undefined;
-};
-
-type CameraScreenNavigationProp = StackNavigationProp<RootStackParamList>;
-
-export default function CameraScreen() {
-  const navigation = useNavigation<CameraScreenNavigationProp>();
+export default function OpenCamera() {
   const cameraRef = useRef<CameraView>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [facing, setFacing] = useState<'front' | 'back'>('back');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -26,34 +18,7 @@ export default function CameraScreen() {
     })();
   }, []);
 
-  const handleCloseCamera = () => {
-    navigation.navigate('index');
-  };
-
-  const handleFlipCamera = () => {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
-  };
-
-  const handlePickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission required', 'Please allow access to your photos');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
-
-  const takePicture = async () => {
+  const takePictureAndSave = async () => {
     if (!cameraRef.current) {
       Alert.alert('Error', 'Camera not ready');
       return;
@@ -61,50 +26,72 @@ export default function CameraScreen() {
 
     try {
       const photo = await cameraRef.current.takePictureAsync();
-      if (!photo) throw new Error('Photo capture failed');
-      Alert.alert('Success', 'Photo captured!');
-      console.log('Photo URI:', photo.uri);
+      if (!photo?.uri) throw new Error('Invalid photo');
+
+      await storePhoto(photo.uri);
+      Alert.alert('Success', 'Photo saved!', [
+        { text: 'View Gallery', onPress: () => router.push('/(tabs)/GalleryScreen') },
+        { text: 'Keep Shooting', style: 'cancel' }
+      ]);
     } catch (error) {
-      Alert.alert('Error', 'Failed to capture photo');
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save photo');
     }
   };
 
-  if (hasPermission === null) return <View />;
-  if (hasPermission === false) return (
-    <View style={styles.permissionContainer}>
-      <Text style={styles.permissionText}>Camera permission required</Text>
-    </View>
-  );
+  const pickImageFromLibrary = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      try {
+        const uri = result.assets[0].uri;
+        await storePhoto(uri);
+        Alert.alert('Success', 'Image saved from gallery!', [
+          { text: 'View Gallery', onPress: () => router.push('/(tabs)/GalleryScreen') },
+          { text: 'Pick Another', style: 'cancel' }
+        ]);
+      } catch (error) {
+        Alert.alert('Error', 'Failed to save image');
+      }
+    }
+  };
+
+  if (hasPermission === null) {
+    return <View style={styles.container}><Text>Requesting permission...</Text></View>;
+  }
+
+  if (hasPermission === false) {
+    return <View style={styles.container}><Text>Camera permission denied</Text></View>;
+  }
 
   return (
     <View style={styles.container}>
-      <CameraView 
-        ref={cameraRef}
-        style={styles.camera}
-        facing={facing}
-      >
-        {/* Top Bar with Close Button */}
+      <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
         <View style={styles.topBar}>
-          <TouchableOpacity style={styles.closeButton} onPress={handleCloseCamera}>
+          <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="close" size={30} color="white" />
           </TouchableOpacity>
         </View>
 
-        {/* Bottom Controls - ABOVE the navigation bar */}
-        <View style={styles.controlsContainer}>
-          {/* Left: Gallery Picker Button */}
-          <TouchableOpacity style={styles.galleryButton} onPress={handlePickImage}>
-            <Ionicons name="images" size={30} color="white" />
+        <View style={styles.controls}>
+          <TouchableOpacity style={styles.captureButton} onPress={takePictureAndSave}>
+            <View style={styles.captureInner} />
           </TouchableOpacity>
 
-          {/* Center: Capture Button */}
-          <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-            <View style={styles.captureButtonInner} />
+          <TouchableOpacity
+            style={styles.flipButton}
+            onPress={() => setFacing(f => f === 'back' ? 'front' : 'back')}
+          >
+            <Ionicons name="camera-reverse" size={24} color="white" />
           </TouchableOpacity>
 
-          {/* Right: Flip Camera Button */}
-          <TouchableOpacity style={styles.flipButton} onPress={handleFlipCamera}>
-            <Ionicons name="camera-reverse" size={30} color="white" />
+          <TouchableOpacity
+            style={styles.galleryButton}
+            onPress={pickImageFromLibrary}
+          >
+            <Ionicons name="images" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -113,74 +100,50 @@ export default function CameraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  camera: {
-    flex: 1,
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
-  },
-  permissionText: {
-    color: 'white',
-    fontSize: 18,
-  },
+  container: { flex: 1 },
+  camera: { flex: 1 },
   topBar: {
     position: 'absolute',
     top: 50,
     right: 20,
     zIndex: 1,
   },
-  closeButton: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-    padding: 10,
-  },
-  controlsContainer: {
+  controls: {
     position: 'absolute',
-    bottom: 100, // Positioned above the navigation bar
-    left: 0,
-    right: 0,
+    bottom: 50,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 30,
-  },
-  galleryButton: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 30,
-    width: 60,
-    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
   },
   captureButton: {
     backgroundColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 2,
+    borderColor: 'white',
     borderRadius: 50,
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: 'white',
   },
-  captureButtonInner: {
+  captureInner: {
     backgroundColor: 'white',
     borderRadius: 30,
     width: 60,
     height: 60,
   },
   flipButton: {
+    position: 'absolute',
+    right: 30,
     backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: 30,
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 15,
+  },
+  galleryButton: {
+    position: 'absolute',
+    left: 30,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 30,
+    padding: 15,
   },
 });
