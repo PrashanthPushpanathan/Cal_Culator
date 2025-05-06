@@ -73,34 +73,39 @@ export class ImageAnalyzer {
     // Function to analyze an image
     public static async analyseImage(imageUrl: string): Promise<Nutrients> {
         try {
-            const base64Image = await getImgInBase64(imageUrl); // Await the base64 conversion
-
+            const base64Image = await getImgInBase64(imageUrl);
+    
             const response = await this.openAI.chat.completions.create({
-                model: "gpt-4.1",
+                model: "gpt-4-turbo", // or "gpt-4o"
                 messages: [
                     {
                         role: "user",
                         content: [
                             { 
                                 type: "text", 
-                                text: `You are a food analysis Bot. Your responses all have the exact same structure. 
-                                You are given Images and you will give a JSON response in which you contain the following properties:
-                                calories (as calories), protein (in grams), fat (in grams), carbohydrates (in grams)
-                                They are displayed like this:
+                                text: `Analyze this food image and return ONLY a JSON object with these exact properties:
+                                - calories (number)
+                                - protein (number, grams)
+                                - fat (number, grams)
+                                - carbohydrates (number, grams)
+                                
+                                Example response:
                                 {
                                     "calories": 300,
-                                    "protein": 10,
-                                    "fat": 20,
+                                    "protein": 20,
+                                    "fat": 10,
                                     "carbohydrates": 40
                                 }
-                                If you can't identify the food, just put four Zeros.
+                                
+                                If you can't identify the food, return:
                                 {
                                     "calories": 0,
                                     "protein": 0,
                                     "fat": 0,
                                     "carbohydrates": 0
                                 }
-                                BUT YOUR RESPONSE IS ALWAYS IN THIS JSON (WITH THESE EXACT PROPERTIES).`
+                                
+                                DO NOT include any additional text or explanation, ONLY the JSON object.`
                             },
                             {
                                 type: "image_url",
@@ -111,32 +116,37 @@ export class ImageAnalyzer {
                         ]
                     }
                 ],
-                response_format: {
-                    type: "json_schema",
-                    json_schema: {
-                        name: "Nutrients",
-                        schema: {
-                            calories: { type: "number" },
-                            protein: { type: "number" },
-                            fat: { type: "number" },
-                            carbohydrates: { type: "number" },
-                            additionalProperties: false
-                        },
-                        strict: true
-                    },
-                }
+                response_format: { type: "json_object" }
             });
-
-            // Parse the response to get the structured data
-            const content = response.choices[0].message.content??"";
-            const nutrients: Nutrients = JSON.parse(content);
-
-            // Return the structured Nutrients object
-            return nutrients;
-
+    
+            const content = response.choices[0].message.content ?? "";
+            
+            // First, check if the content is valid JSON
+            let parsed;
+            try {
+                parsed = JSON.parse(content);
+            } catch (e) {
+                throw new Error("Response was not valid JSON");
+            }
+    
+            // Then validate the structure
+            if (typeof parsed !== "object" || 
+                typeof parsed.calories !== "number" ||
+                typeof parsed.protein !== "number" ||
+                typeof parsed.fat !== "number" ||
+                typeof parsed.carbohydrates !== "number") {
+                throw new Error("Response did not match expected format");
+            }
+    
+            return {
+                calories: parsed.calories,
+                protein: parsed.protein,
+                fat: parsed.fat,
+                carbohydrates: parsed.carbohydrates
+            };
+    
         } catch (error) {
             console.error("Error during image analysis:", error);
-            // Return a default value in case of error
             return {
                 calories: 0,
                 protein: 0,
