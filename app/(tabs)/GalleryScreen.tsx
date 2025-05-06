@@ -8,26 +8,37 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg'; // Import Svg and Circle
 import { Ionicons } from '@expo/vector-icons';
 import { getPhotos, deletePhoto } from '../utils/storage';
 import { useFocusEffect, router } from 'expo-router';
 
-type ProgressCircleProps = {
-  size: number;
-  strokeWidth: number;
-  progress: number;
-  current: number;
-  goal: number;
-  label: string;
-  color: string;
+// MacroBar Component
+const MacroBar = ({ label, current, goal, color }: { label: string; current: number; goal: number; color: string }) => {
+  const percent = Math.min(current / goal, 1);
+
+  return (
+    <View style={styles.macroBarContainer}>
+      <View style={styles.macroLabelRow}>
+        <Text style={styles.macroLabel}>{label}</Text>
+        <Text style={styles.macroNumbers}>{current} / {goal}g</Text>
+      </View>
+      <View style={styles.barBackground}>
+        <View style={[styles.barFill, { width: `${percent * 100}%`, backgroundColor: color }]} />
+      </View>
+    </View>
+  );
 };
 
-type MacroBarProps = {
-  label: string;
-  current: number;
-  goal: number;
-  color: string;
+type PhotoItem = {
+  key: string;
+  uri: string;
+  nutrition: {
+    calories: number;
+    protein: number;
+    fats: number;
+    carbs: number;
+  };
 };
 
 const ProgressCircle = ({
@@ -38,7 +49,15 @@ const ProgressCircle = ({
   goal,
   label,
   color,
-}: ProgressCircleProps) => {
+}: {
+  size: number;
+  strokeWidth: number;
+  progress: number;
+  current: number;
+  goal: number;
+  label: string;
+  color: string;
+}) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
@@ -77,23 +96,8 @@ const ProgressCircle = ({
   );
 };
 
-const MacroBar = ({ label, current, goal, color }: MacroBarProps) => {
-  const percent = Math.min(current / goal, 1);
-  return (
-    <View style={styles.macroBarContainer}>
-      <View style={styles.macroLabelRow}>
-        <Text style={styles.macroLabel}>{label}</Text>
-        <Text style={styles.macroNumbers}>{current} / {goal}g</Text>
-      </View>
-      <View style={styles.barBackground}>
-        <View style={[styles.barFill, { width: `${percent * 100}%`, backgroundColor: color }]} />
-      </View>
-    </View>
-  );
-};
-
 export default function GalleryScreen() {
-  const [photos, setPhotos] = useState<Array<{ key: string; uri: string }>>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadPhotos = async () => {
@@ -125,13 +129,13 @@ export default function GalleryScreen() {
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
+      {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.title}>Nutrition Dashboard</Text>
         <View style={{ width: 24 }} />
-        <View style={{ height: 24 }} />
       </View>
 
-      {/* CALORIE CIRCLE */}
+      {/* Calorie Circle */}
       <View style={styles.centerContent}>
         <ProgressCircle
           size={200}
@@ -144,20 +148,20 @@ export default function GalleryScreen() {
         />
       </View>
 
-      {/* MACRO BARS */}
+      {/* Macro Bars */}
       <View style={styles.macroContainer}>
         <MacroBar label="Protein" current={60} goal={100} color="#FF6B6B" />
         <MacroBar label="Fats" current={40} goal={70} color="#FFD166" />
         <MacroBar label="Carbs" current={150} goal={200} color="#06D6A0" />
       </View>
 
-      {/* RECENTS TITLE */}
+      {/* Recents Section */}
       <View style={styles.recentsSection}>
         <Text style={styles.recentsTitle}>Recents</Text>
         <View style={styles.divider} />
       </View>
 
-      {/* GALLERY */}
+      {/* Photo Gallery */}
       {photos.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="images" size={60} color="#ccc" />
@@ -179,8 +183,7 @@ export default function GalleryScreen() {
                   router.push({
                     pathname: '/(tabs)/PhotoViewer',
                     params: {
-                      index: index.toString(),
-                      all: JSON.stringify(photos.map((p) => p.uri)),
+                      photo: JSON.stringify(item), // Pass full photo object
                     },
                   })
                 }
@@ -198,7 +201,7 @@ export default function GalleryScreen() {
         />
       )}
 
-      {/* ADD PHOTO BUTTON */}
+      {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push('/(tabs)/OpenCamera')}

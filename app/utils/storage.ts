@@ -3,12 +3,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PHOTOS_KEY = 'SAVED_PHOTOS';
 
-type PhotoItem = {
+export type PhotoItem = {
   key: string;
   uri: string;
+  nutrition: {
+    calories: number;
+    protein: number;
+    fats: number;
+    carbs: number;
+  };
 };
 
-// Lade gespeicherte Fotoeinträge
 export const getPhotos = async (): Promise<PhotoItem[]> => {
   try {
     const json = await AsyncStorage.getItem(PHOTOS_KEY);
@@ -19,30 +24,32 @@ export const getPhotos = async (): Promise<PhotoItem[]> => {
   }
 };
 
-// Speichere Foto-URI als kopierte Datei im App-Speicher
 export const storePhoto = async (originalUri: string): Promise<void> => {
   try {
     const filename = `${Date.now()}.jpg`;
     const folder = `${FileSystem.documentDirectory}photos/`;
 
-    // Stelle sicher, dass der Ordner existiert
     const dirInfo = await FileSystem.getInfoAsync(folder);
     if (!dirInfo.exists) {
       await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
     }
 
     const newUri = folder + filename;
-
-    // Kopiere Datei in App-Ordner
     await FileSystem.copyAsync({ from: originalUri, to: newUri });
 
-    const newPhoto: PhotoItem = { key: filename, uri: newUri };
+    const newPhoto: PhotoItem = {
+      key: filename,
+      uri: newUri,
+      nutrition: {
+        calories: Math.floor(Math.random() * 500) + 300,
+        protein: Math.floor(Math.random() * 50) + 10,
+        fats: Math.floor(Math.random() * 30) + 5,
+        carbs: Math.floor(Math.random() * 100) + 20,
+      },
+    };
 
-    // Lade aktuelle Liste, hänge neues Foto an
     const current = await getPhotos();
     const updated = [newPhoto, ...current];
-
-    // Speichere neue Liste
     await AsyncStorage.setItem(PHOTOS_KEY, JSON.stringify(updated));
   } catch (error) {
     console.error('Failed to store photo', error);
@@ -50,7 +57,6 @@ export const storePhoto = async (originalUri: string): Promise<void> => {
   }
 };
 
-// Lösche Foto aus Liste und vom Dateisystem
 export const deletePhoto = async (key: string): Promise<void> => {
   try {
     const current = await getPhotos();

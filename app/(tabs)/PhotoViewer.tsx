@@ -11,30 +11,31 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 
 export default function PhotoViewer() {
-  const { index, all } = useLocalSearchParams();
-  const imageUris = JSON.parse(all as string);
-  const currentImage = imageUris[parseInt(index as string)];
+  const { photo } = useLocalSearchParams();
+  const photoData = JSON.parse(photo as string);
 
-  // You could fetch actual nutrition info based on photo ID in a real app
-  const calories = 630;
-  const protein = 60;
-  const fats = 40;
-  const carbs = 150;
+  // Hardcoded values for testing purposes
+  const uri = photoData.uri || '';  // Fallback to empty string if uri is missing
+  const nutrition = photoData.nutrition || {
+    calories: 500,
+    protein: 30,
+    fats: 20,
+    carbs: 60,
+  };
+
+  const { calories, protein, fats, carbs } = nutrition;
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Image - Top 40% */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: currentImage }} style={styles.image} />
+        <Image source={{ uri }} style={styles.image} />
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="white" />
         </TouchableOpacity>
       </View>
 
-      {/* Info - Bottom 60% */}
       <View style={styles.infoSection}>
         <Text style={styles.sectionTitle}>Meal Nutrition</Text>
-
         <Text style={styles.caloriesText}>{calories} kcal</Text>
 
         <View style={styles.macroRow}>
