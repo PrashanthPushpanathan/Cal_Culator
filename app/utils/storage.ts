@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ImageAnalyzer } from './ImageAnalyzer';
 
 const PHOTOS_KEY = 'SAVED_PHOTOS';
 
@@ -37,11 +38,13 @@ export const storePhoto = async (originalUri: string): Promise<void> => {
     await FileSystem.copyAsync({ from: originalUri, to: newUri });
 
     const newPhoto: PhotoItem = { key: filename, uri: newUri };
+    
+    const a = ImageAnalyzer.analyseImage(newPhoto.uri)
 
     // Lade aktuelle Liste, hänge neues Foto an
     const current = await getPhotos();
     const updated = [newPhoto, ...current];
-
+    
     // Speichere neue Liste
     await AsyncStorage.setItem(PHOTOS_KEY, JSON.stringify(updated));
   } catch (error) {
