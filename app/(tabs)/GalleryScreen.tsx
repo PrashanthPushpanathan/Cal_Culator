@@ -8,12 +8,96 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import Svg, { Circle } from 'react-native-svg'; // Import Svg and Circle
 import { Ionicons } from '@expo/vector-icons';
 import { getPhotos, deletePhoto } from '../utils/storage';
 import { useFocusEffect, router } from 'expo-router';
 
+// MacroBar Component
+const MacroBar = ({ label, current, goal, color }: { label: string; current: number; goal: number; color: string }) => {
+  const percent = Math.min(current / goal, 1);
+
+  return (
+    <View style={styles.macroBarContainer}>
+      <View style={styles.macroLabelRow}>
+        <Text style={styles.macroLabel}>{label}</Text>
+        <Text style={styles.macroNumbers}>{current} / {goal}g</Text>
+      </View>
+      <View style={styles.barBackground}>
+        <View style={[styles.barFill, { width: `${percent * 100}%`, backgroundColor: color }]} />
+      </View>
+    </View>
+  );
+};
+
+type PhotoItem = {
+  key: string;
+  uri: string;
+  nutrition: {
+    calories: number;
+    protein: number;
+    fats: number;
+    carbs: number;
+  };
+};
+
+const ProgressCircle = ({
+  size,
+  strokeWidth,
+  progress,
+  current,
+  goal,
+  label,
+  color,
+}: {
+  size: number;
+  strokeWidth: number;
+  progress: number;
+  current: number;
+  goal: number;
+  label: string;
+  color: string;
+}) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference * (1 - progress);
+
+  return (
+    <View style={styles.circleContainer}>
+      <Svg width={size} height={size}>
+        <Circle
+          stroke="#333"
+          fill="none"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+        />
+        <Circle
+          stroke={color}
+          fill="none"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          rotation="-90"
+          origin={`${size / 2}, ${size / 2}`}
+        />
+      </Svg>
+      <View style={styles.circleTextContainer}>
+        <Ionicons name="flame" size={24} color={color} />
+        <Text style={styles.circleText}>{current} kcal</Text>
+        <Text style={styles.subText}>Goal {goal}</Text>
+      </View>
+    </View>
+  );
+};
+
 export default function GalleryScreen() {
-  const [photos, setPhotos] = useState<Array<{ key: string; uri: string }>>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadPhotos = async () => {
@@ -45,14 +129,39 @@ export default function GalleryScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Photo Gallery</Text>
+        <Text style={styles.title}>Nutrition Dashboard</Text>
         <View style={{ width: 24 }} />
       </View>
 
+      {/* Calorie Circle */}
+      <View style={styles.centerContent}>
+        <ProgressCircle
+          size={200}
+          strokeWidth={12}
+          progress={630 / 1000}
+          current={630}
+          goal={1000}
+          label="Calories"
+          color="#00BFFF"
+        />
+      </View>
+
+      {/* Macro Bars */}
+      <View style={styles.macroContainer}>
+        <MacroBar label="Protein" current={60} goal={100} color="#FF6B6B" />
+        <MacroBar label="Fats" current={40} goal={70} color="#FFD166" />
+        <MacroBar label="Carbs" current={150} goal={200} color="#06D6A0" />
+      </View>
+
+      {/* Recents Section */}
+      <View style={styles.recentsSection}>
+        <Text style={styles.recentsTitle}>Recents</Text>
+        <View style={styles.divider} />
+      </View>
+
+      {/* Photo Gallery */}
       {photos.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="images" size={60} color="#ccc" />
@@ -61,6 +170,7 @@ export default function GalleryScreen() {
         </View>
       ) : (
         <FlatList
+          contentContainerStyle={styles.galleryList}
           data={photos}
           numColumns={3}
           keyExtractor={(item) => item.key}
@@ -73,8 +183,7 @@ export default function GalleryScreen() {
                   router.push({
                     pathname: '/(tabs)/PhotoViewer',
                     params: {
-                      index: index.toString(),
-                      all: JSON.stringify(photos.map((p) => p.uri)),
+                      photo: JSON.stringify(item), // Pass full photo object
                     },
                   })
                 }
@@ -92,28 +201,98 @@ export default function GalleryScreen() {
         />
       )}
 
-      {/* ➕ Floating Button */}
+      {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push('/(tabs)/OpenCamera')}
       >
-        <Ionicons name="add" size={30} color="white" />
+        <Ionicons name="camera" size={30} color="white" />
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
+  container: { flex: 1, backgroundColor: 'black', paddingTop: 40 },
   header: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
-  title: { fontSize: 18, fontWeight: 'bold' },
+  title: { fontSize: 22, fontWeight: 'bold', color: 'white' },
+
+  centerContent: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  circleContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circleTextContainer: {
+    position: 'absolute',
+    alignItems: 'center',
+  },
+  circleText: {
+    fontSize: 32,
+    color: 'white',
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+  subText: {
+    fontSize: 14,
+    color: '#aaa',
+  },
+
+  macroContainer: {
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  macroBarContainer: {
+    marginBottom: 20,
+  },
+  macroLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  macroLabel: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  macroNumbers: {
+    color: '#ccc',
+  },
+  barBackground: {
+    height: 10,
+    backgroundColor: '#333',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  barFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+
+  recentsSection: {
+    paddingHorizontal: 15,
+    paddingTop: 20,
+  },
+  recentsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#444',
+    width: '100%',
+    marginBottom: 10,
+  },
+
   empty: {
     flex: 1,
     justifyContent: 'center',
@@ -154,14 +333,13 @@ const styles = StyleSheet.create({
     right: 30,
     width: 60,
     height: 60,
-    borderRadius: 12, // Cube Look
-    backgroundColor: 'black',
+    borderRadius: 30,
+    backgroundColor: '#00BFFF',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+  },
+  galleryList: {
+    paddingBottom: 100,
   },
 });
