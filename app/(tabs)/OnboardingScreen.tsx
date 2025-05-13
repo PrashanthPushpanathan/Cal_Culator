@@ -1,85 +1,100 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Picker } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 
 const OnboardingScreen = () => {
-  const [goal, setGoal] = useState<'gain' | 'lose' | null>(null);
-  const [age, setAge] = useState<string>('');
-  const [height, setHeight] = useState<string>('');
-  const [weight, setWeight] = useState<string>('');
-  const [calories, setCalories] = useState<number>(0);
-  const [protein, setProtein] = useState<number>(0);
-  const [fats, setFats] = useState<number>(0);
-  const [carbs, setCarbs] = useState<number>(0);
+  const [age, setAge] = useState<number>(25);
+  const [height, setHeight] = useState<number>(170);
+  const [weight, setWeight] = useState<number>(70);
+  const [goalWeight, setGoalWeight] = useState<number>(75);
   const router = useRouter();
 
-  const handleCalculate = () => {
-    if (goal && age && height && weight) {
-      const ageNum = parseInt(age);
-      const heightNum = parseInt(height);
-      const weightNum = parseInt(weight);
+const handleCalculate = () => {
+  const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  const isGaining = goalWeight > weight;
+  const kcalChangePerDay = 480;
+  const calorieGoal = isGaining ? bmr + kcalChangePerDay : bmr - kcalChangePerDay;
 
-      // Calculate daily calorie intake (this is just a placeholder for your formula)
-      const bmr = 10 * weightNum + 6.25 * heightNum - 5 * ageNum + 5; // Mifflin-St Jeor Equation for Men
-      const calorieGoal = goal === 'gain' ? bmr + 500 : bmr - 500;
+  // Protein: 2g per kg body weight
+  const proteinGrams = weight * 2;
+  const proteinCalories = proteinGrams * 4;
 
-      // Set up macros (example formula)
-      setCalories(calorieGoal);
-      setProtein(calorieGoal * 0.3);
-      setFats(calorieGoal * 0.2);
-      setCarbs(calorieGoal * 0.5);
+  // Fat: 25% of total calories
+  const fatCalories = calorieGoal * 0.25;
+  const fatGrams = fatCalories / 9;
 
-      // Navigate to the homepage with the results
-      router.push({
-        pathname: '/(tabs)/HomePage',
-        params: {
-          calories: calorieGoal,
-          protein: calorieGoal * 0.3,
-          fats: calorieGoal * 0.2,
-          carbs: calorieGoal * 0.5,
-        },
-      });
-    } else {
-      alert('Please fill all the fields');
-    }
-  };
+  // Carbs = remaining calories
+  const remainingCalories = calorieGoal - (proteinCalories + fatCalories);
+  const carbGrams = remainingCalories / 4;
+
+  router.push({
+    pathname: '/(tabs)/GalleryScreen',
+    params: {
+      calories: calorieGoal,
+      protein: proteinGrams,
+      fats: fatGrams,
+      carbs: carbGrams,
+    },
+  });
+};
+
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Onboarding</Text>
-      <Text style={styles.label}>Select your goal</Text>
-      <Picker
-        selectedValue={goal}
-        onValueChange={(itemValue) => setGoal(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Gain Weight" value="gain" />
-        <Picker.Item label="Lose Weight" value="lose" />
-      </Picker>
+      <View style={styles.inputsContainer}>
+        <Text style={styles.inputLabel}>Age: {age}</Text>
+        <Slider
+          style={styles.slider}
+          minimumValue={18}
+          maximumValue={100}
+          step={1}
+          value={age}
+          onValueChange={(value) => setAge(value)}
+          minimumTrackTintColor="#00BFFF"
+          maximumTrackTintColor="#ddd"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Age"
-        keyboardType="numeric"
-        value={age}
-        onChangeText={setAge}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Height (in cm)"
-        keyboardType="numeric"
-        value={height}
-        onChangeText={setHeight}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Weight (in kg)"
-        keyboardType="numeric"
-        value={weight}
-        onChangeText={setWeight}
-      />
+        <Text style={styles.inputLabel}>Height (cm): {height}</Text>
+        <Slider
+          style={styles.slider}
+          minimumValue={100}
+          maximumValue={250}
+          step={1}
+          value={height}
+          onValueChange={(value) => setHeight(value)}
+          minimumTrackTintColor="#00BFFF"
+          maximumTrackTintColor="#ddd"
+        />
 
-      <Button title="Calculate Goals" onPress={handleCalculate} />
+        <Text style={styles.inputLabel}>Current Weight (kg): {weight}</Text>
+        <Slider
+          style={styles.slider}
+          minimumValue={30}
+          maximumValue={200}
+          step={1}
+          value={weight}
+          onValueChange={(value) => setWeight(value)}
+          minimumTrackTintColor="#00BFFF"
+          maximumTrackTintColor="#ddd"
+        />
+
+        <Text style={styles.inputLabel}>Goal Weight (kg): {goalWeight}</Text>
+        <Slider
+          style={styles.slider}
+          minimumValue={30}
+          maximumValue={200}
+          step={1}
+          value={goalWeight}
+          onValueChange={(value) => setGoalWeight(value)}
+          minimumTrackTintColor="#00BFFF"
+          maximumTrackTintColor="#ddd"
+        />
+
+        <TouchableOpacity style={styles.calculateButton} onPress={handleCalculate}>
+          <Text style={styles.buttonText}>Calculate Goals</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -88,31 +103,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
-    backgroundColor: 'black',
+    backgroundColor: '#000000',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 20,
+  inputsContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  inputLabel: {
+    fontSize: 16,
+    color: '#ffffff',
+    marginBottom: 10,
     textAlign: 'center',
   },
-  label: {
-    fontSize: 16,
+  slider: {
+    width: '80%',
+    height: 40,
+    marginBottom: 20,
+  },
+  calculateButton: {
+    backgroundColor: '#00BFFF',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
     color: 'white',
-    marginBottom: 10,
-  },
-  input: {
-    backgroundColor: '#fff',
-    padding: 10,
-    marginBottom: 15,
-    borderRadius: 5,
-  },
-  picker: {
-    backgroundColor: '#fff',
-    marginBottom: 15,
-    borderRadius: 5,
+    fontWeight: 'bold',
   },
 });
 
