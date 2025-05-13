@@ -13,6 +13,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { getPhotos, deletePhoto } from '../utils/storage';
 import { useFocusEffect, router } from 'expo-router';
 
+type PhotoItem = {
+  key: string;
+  uri: string;
+  nutrition: {
+    calories: number;
+    protein: number;
+    fats: number;
+    carbs: number;
+  };
+};
+
 // MacroBar Component
 const MacroBar = ({ label, current, goal, color }: { label: string; current: number; goal: number; color: string }) => {
   const percent = Math.min(current / goal, 1);
@@ -28,17 +39,6 @@ const MacroBar = ({ label, current, goal, color }: { label: string; current: num
       </View>
     </View>
   );
-};
-
-type PhotoItem = {
-  key: string;
-  uri: string;
-  nutrition: {
-    calories: number;
-    protein: number;
-    fats: number;
-    carbs: number;
-  };
 };
 
 const ProgressCircle = ({
@@ -158,6 +158,12 @@ export default function GalleryScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Nutrition Dashboard</Text>
         <View style={{ width: 24 }} />
+        <TouchableOpacity
+          style={styles.goalButton}
+          onPress={() => router.push('/(tabs)/SetGoals')} 
+        >
+          <Ionicons name="flag" size={24} bolor="blue" style={{ backgroundColor: 'transparent' }} />
+        </TouchableOpacity>
       </View>
 
       {/* Calorie Circle */}
@@ -366,5 +372,10 @@ const styles = StyleSheet.create({
   },
   galleryList: {
     paddingBottom: 100,
+  },
+  goalButton: {
+    backgroundColor: '#00BFFF',
+    padding: 10,
+    borderRadius: 10,
   },
 });

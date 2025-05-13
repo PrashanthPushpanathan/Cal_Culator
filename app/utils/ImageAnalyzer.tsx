@@ -52,7 +52,7 @@ export class ImageAnalyzer {
                 BUT YOUR RESPONSE IS ALWAYS IN THIS JSON (WITH THESE EXACT PROPERTIES).`,
             name: "FoodAnalyser",
             tools: [{ type: "code_interpreter" }],
-            model: "gpt-4o",
+            model: "gpt-4.1-mini",
             response_format: {
                 type: "json_schema",
                 json_schema: {
@@ -76,7 +76,7 @@ export class ImageAnalyzer {
             const base64Image = await getImgInBase64(imageUrl);
     
             const response = await this.openAI.chat.completions.create({
-                model: "gpt-4-turbo", // or "gpt-4o"
+                model: "gpt-4.1-mini", // or "gpt-4o"
                 messages: [
                     {
                         role: "user",
