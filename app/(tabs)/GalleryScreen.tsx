@@ -62,6 +62,9 @@ const ProgressCircle = ({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
 
+  // Determine if the goal is exceeded
+  const isGoalExceeded = current > goal;
+  const dynamicColor = isGoalExceeded ? 'red' : color;
   return (
     <View style={styles.circleContainer}>
       <Svg width={size} height={size}>
@@ -74,7 +77,7 @@ const ProgressCircle = ({
           strokeWidth={strokeWidth}
         />
         <Circle
-          stroke={color}
+          stroke={dynamicColor} 
           fill="none"
           cx={size / 2}
           cy={size / 2}
@@ -88,7 +91,7 @@ const ProgressCircle = ({
         />
       </Svg>
       <View style={styles.circleTextContainer}>
-        <Ionicons name="flame" size={24} color={color} />
+        <Ionicons name="flame" size={24} color={dynamicColor} />
         <Text style={styles.circleText}>{current} kcal</Text>
         <Text style={styles.subText}>Goal {goal}</Text>
       </View>
