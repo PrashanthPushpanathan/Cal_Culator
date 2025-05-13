@@ -131,7 +131,7 @@ export default function GalleryScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Nutrition Dashboard</Text>
+        <View style={{ height: 24 }} />
         <View style={{ width: 24 }} />
       </View>
 
