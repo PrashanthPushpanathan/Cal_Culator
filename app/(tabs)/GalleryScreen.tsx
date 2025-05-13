@@ -100,6 +100,11 @@ export default function GalleryScreen() {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  const goalCalories = 1000;
+  const goalProtein = 100;
+  const goalFats = 70;
+  const goalCarbs = 200;
+
   const loadPhotos = async () => {
     setRefreshing(true);
     try {
@@ -117,6 +122,23 @@ export default function GalleryScreen() {
       loadPhotos();
     }, [])
   );
+
+  // Calculate totals when photos are loaded
+  const total = photos?.reduce(
+    (acc, photo) => {
+      acc.calories += photo.nutrition.calories;
+      acc.protein += photo.nutrition.protein;
+      acc.fats += photo.nutrition.fats;
+      acc.carbs += photo.nutrition.carbs;
+      return acc;
+    },
+    { calories: 0, protein: 0, fats: 0, carbs: 0 }
+  );
+
+  const calorieProgress = Math.min(total.calories / goalCalories, 1);
+  const proteinProgress = Math.min(total.protein / goalProtein, 1);
+  const fatsProgress = Math.min(total.fats / goalFats, 1);
+  const carbsProgress = Math.min(total.carbs / goalCarbs, 1);
 
   const handleDelete = async (key: string) => {
     try {
@@ -140,9 +162,9 @@ export default function GalleryScreen() {
         <ProgressCircle
           size={200}
           strokeWidth={12}
-          progress={630 / 1000}
-          current={630}
-          goal={1000}
+          progress={calorieProgress}
+          current={total.calories}
+          goal={goalCalories}
           label="Calories"
           color="#00BFFF"
         />
@@ -150,9 +172,9 @@ export default function GalleryScreen() {
 
       {/* Macro Bars */}
       <View style={styles.macroContainer}>
-        <MacroBar label="Protein" current={60} goal={100} color="#FF6B6B" />
-        <MacroBar label="Fats" current={40} goal={70} color="#FFD166" />
-        <MacroBar label="Carbs" current={150} goal={200} color="#06D6A0" />
+        <MacroBar label="Protein" current={total.protein} goal={goalProtein} color="#FF6B6B" />
+        <MacroBar label="Fats" current={total.fats} goal={goalFats} color="#FFD166" />
+        <MacroBar label="Carbs" current={total.carbs} goal={goalCarbs} color="#06D6A0" />
       </View>
 
       {/* Recents Section */}
