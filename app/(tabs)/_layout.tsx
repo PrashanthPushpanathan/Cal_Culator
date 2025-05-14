@@ -6,7 +6,6 @@ export default function TabsLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="OpenCamera" />
       <Stack.Screen name="PhotoViewer" />
-      <Stack.Screen name="SetGoals" />
     </Stack>
   );
 }

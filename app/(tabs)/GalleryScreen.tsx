@@ -158,12 +158,6 @@ export default function GalleryScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Nutrition Dashboard</Text>
         <View style={{ width: 24 }} />
-        <TouchableOpacity
-          style={styles.goalButton}
-          onPress={() => router.push('/(tabs)/SetGoals')} 
-        >
-          <Ionicons name="flag" size={24} bolor="blue" style={{ backgroundColor: 'transparent' }} />
-        </TouchableOpacity>
       </View>
 
       {/* Calorie Circle */}
