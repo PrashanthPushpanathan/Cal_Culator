@@ -10,35 +10,37 @@ const OnboardingScreen = () => {
   const [goalWeight, setGoalWeight] = useState<number>(75);
   const router = useRouter();
 
-const handleCalculate = () => {
-  const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-  const isGaining = goalWeight > weight;
-  const kcalChangePerDay = 480;
-  const calorieGoal = isGaining ? bmr + kcalChangePerDay : bmr - kcalChangePerDay;
+  const handleCalculate = () => {
+    const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    const isGaining = goalWeight > weight;
+    const kcalChangePerDay = 480;
+    const calorieGoal = isGaining ? bmr + kcalChangePerDay : bmr - kcalChangePerDay;
 
-  // Protein: 2g per kg body weight
-  const proteinGrams = weight * 2;
-  const proteinCalories = proteinGrams * 4;
+    const proteinGrams = weight * 2;
+    const proteinCalories = proteinGrams * 4;
 
-  // Fat: 25% of total calories
-  const fatCalories = calorieGoal * 0.25;
-  const fatGrams = fatCalories / 9;
+    const fatCalories = calorieGoal * 0.25;
+    const fatGrams = fatCalories / 9;
 
-  // Carbs = remaining calories
-  const remainingCalories = calorieGoal - (proteinCalories + fatCalories);
-  const carbGrams = remainingCalories / 4;
+    const remainingCalories = calorieGoal - (proteinCalories + fatCalories);
+    const carbGrams = remainingCalories / 4;
 
-  router.push({
-    pathname: '/(tabs)/GalleryScreen',
-    params: {
-      calories: calorieGoal,
-      protein: proteinGrams,
-      fats: fatGrams,
-      carbs: carbGrams,
-    },
-  });
-};
+    const weightDifference = Math.abs(goalWeight - weight);
+    const kcalPerKg = 7700;
+    const totalKcalNeeded = weightDifference * kcalPerKg;
+    const estimatedDays = Math.ceil(totalKcalNeeded / kcalChangePerDay);
 
+    router.push({
+      pathname: '/(tabs)/GalleryScreen',
+      params: {
+        calories: calorieGoal,
+        protein: proteinGrams,
+        fats: fatGrams,
+        carbs: carbGrams,
+        daysLeft: estimatedDays,
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>
