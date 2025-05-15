@@ -4,14 +4,14 @@ import {
   Text,
   Image,
   FlatList,
-  StyleSheet,
   TouchableOpacity,
   Alert,
+  StyleSheet,
 } from 'react-native';
-import Svg, { Circle } from 'react-native-svg'; // Import Svg and Circle
+import Svg, { Circle } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { getPhotos, deletePhoto } from '../utils/storage';
-import { useFocusEffect, router } from 'expo-router';
+import { useFocusEffect, router, useLocalSearchParams } from 'expo-router';
 
 type PhotoItem = {
   key: string;
@@ -24,10 +24,9 @@ type PhotoItem = {
   };
 };
 
-// MacroBar Component
+
 const MacroBar = ({ label, current, goal, color }: { label: string; current: number; goal: number; color: string }) => {
   const percent = Math.min(current / goal, 1);
-
   return (
     <View style={styles.macroBarContainer}>
       <View style={styles.macroLabelRow}>
@@ -100,6 +99,13 @@ const ProgressCircle = ({
 };
 
 export default function GalleryScreen() {
+  const { calories, protein, fats, carbs, daysLeft } = useLocalSearchParams();
+  const calorieGoal = parseInt(calories as string) || 1000;
+  const proteinGoal = parseInt(protein as string) || 100;
+  const fatGoal = parseInt(fats as string) || 70;
+  const carbGoal = parseInt(carbs as string) || 200;
+  const estimatedDays = parseInt(daysLeft as string) || 0;
+
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -113,7 +119,7 @@ export default function GalleryScreen() {
     try {
       const loadedPhotos = await getPhotos();
       setPhotos(loadedPhotos);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to load photos');
     } finally {
       setRefreshing(false);
@@ -147,16 +153,22 @@ export default function GalleryScreen() {
     try {
       await deletePhoto(key);
       loadPhotos();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to delete photo');
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* Days Left */}
+      <View style={{ alignItems: 'center', paddingTop: 30 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#00BFFF' }}>
+          {estimatedDays} days left
+        </Text>
+      </View>
+
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Nutrition Dashboard</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -201,15 +213,13 @@ export default function GalleryScreen() {
           keyExtractor={(item) => item.key}
           refreshing={refreshing}
           onRefresh={loadPhotos}
-          renderItem={({ item, index }) => (
+          renderItem={({ item }) => (
             <View style={styles.photoContainer}>
               <TouchableOpacity
                 onPress={() =>
                   router.push({
                     pathname: '/(tabs)/PhotoViewer',
-                    params: {
-                      photo: JSON.stringify(item), // Pass full photo object
-                    },
+                    params: { photo: JSON.stringify(item) },
                   })
                 }
               >
@@ -237,6 +247,7 @@ export default function GalleryScreen() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black', paddingTop: 40 },
   header: {
@@ -260,6 +271,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
   },
+  daysLeftContainer: {
+  alignItems: 'center',
+  paddingTop: 10,
+},
+daysLeftText: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#00BFFF',
+},
+
   circleText: {
     fontSize: 32,
     color: 'white',
