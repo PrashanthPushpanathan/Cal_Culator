@@ -24,6 +24,7 @@ type PhotoItem = {
   };
 };
 
+
 const MacroBar = ({ label, current, goal, color }: { label: string; current: number; goal: number; color: string }) => {
   const percent = Math.min(current / goal, 1);
   return (
@@ -60,6 +61,9 @@ const ProgressCircle = ({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
 
+  // Determine if the goal is exceeded
+  const isGoalExceeded = current > goal;
+  const dynamicColor = isGoalExceeded ? 'red' : color;
   return (
     <View style={styles.circleContainer}>
       <Svg width={size} height={size}>
@@ -72,7 +76,7 @@ const ProgressCircle = ({
           strokeWidth={strokeWidth}
         />
         <Circle
-          stroke={color}
+          stroke={dynamicColor} 
           fill="none"
           cx={size / 2}
           cy={size / 2}
@@ -86,7 +90,7 @@ const ProgressCircle = ({
         />
       </Svg>
       <View style={styles.circleTextContainer}>
-        <Ionicons name="flame" size={24} color={color} />
+        <Ionicons name="flame" size={24} color={dynamicColor} />
         <Text style={styles.circleText}>{current} kcal</Text>
         <Text style={styles.subText}>Goal {goal}</Text>
       </View>
@@ -105,6 +109,11 @@ export default function GalleryScreen() {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  const goalCalories = 1000;
+  const goalProtein = 100;
+  const goalFats = 70;
+  const goalCarbs = 200;
+
   const loadPhotos = async () => {
     setRefreshing(true);
     try {
@@ -122,6 +131,23 @@ export default function GalleryScreen() {
       loadPhotos();
     }, [])
   );
+
+  // Calculate totals when photos are loaded
+  const total = photos?.reduce(
+    (acc, photo) => {
+      acc.calories += photo.nutrition.calories;
+      acc.protein += photo.nutrition.protein;
+      acc.fats += photo.nutrition.fats;
+      acc.carbs += photo.nutrition.carbs;
+      return acc;
+    },
+    { calories: 0, protein: 0, fats: 0, carbs: 0 }
+  );
+
+  const calorieProgress = Math.min(total.calories / goalCalories, 1);
+  const proteinProgress = Math.min(total.protein / goalProtein, 1);
+  const fatsProgress = Math.min(total.fats / goalFats, 1);
+  const carbsProgress = Math.min(total.carbs / goalCarbs, 1);
 
   const handleDelete = async (key: string) => {
     try {
@@ -151,9 +177,9 @@ export default function GalleryScreen() {
         <ProgressCircle
           size={200}
           strokeWidth={12}
-          progress={630 / calorieGoal}
-          current={630}
-          goal={calorieGoal}
+          progress={calorieProgress}
+          current={total.calories}
+          goal={goalCalories}
           label="Calories"
           color="#00BFFF"
         />
@@ -161,9 +187,9 @@ export default function GalleryScreen() {
 
       {/* Macro Bars */}
       <View style={styles.macroContainer}>
-        <MacroBar label="Protein" current={60} goal={proteinGoal} color="#FF6B6B" />
-        <MacroBar label="Fats" current={40} goal={fatGoal} color="#FFD166" />
-        <MacroBar label="Carbs" current={150} goal={carbGoal} color="#06D6A0" />
+        <MacroBar label="Protein" current={total.protein} goal={goalProtein} color="#FF6B6B" />
+        <MacroBar label="Fats" current={total.fats} goal={goalFats} color="#FFD166" />
+        <MacroBar label="Carbs" current={total.carbs} goal={goalCarbs} color="#06D6A0" />
       </View>
 
       {/* Recents Section */}
@@ -361,5 +387,10 @@ daysLeftText: {
   },
   galleryList: {
     paddingBottom: 100,
+  },
+  goalButton: {
+    backgroundColor: '#00BFFF',
+    padding: 10,
+    borderRadius: 10,
   },
 });

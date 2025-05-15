@@ -38,19 +38,20 @@ export const storePhoto = async (originalUri: string): Promise<void> => {
     const newUri = folder + filename;
     await FileSystem.copyAsync({ from: originalUri, to: newUri });
 
+    const analysedImage = await ImageAnalyzer.analyseImage(newUri)
 
     const newPhoto: PhotoItem = {
       key: filename,
       uri: newUri,
       nutrition: {
-        calories: Math.floor(Math.random() * 500) + 300,
-        protein: Math.floor(Math.random() * 50) + 10,
-        fats: Math.floor(Math.random() * 30) + 5,
-        carbs: Math.floor(Math.random() * 100) + 20,
+        calories:  analysedImage.calories,//Math.floor(Math.random() * 500) + 300,
+        protein: analysedImage.protein,//Math.floor(Math.random() * 50) + 10,
+        fats: analysedImage.fat,//Math.floor(Math.random() * 30) + 5,
+        carbs: analysedImage.carbohydrates,//Math.floor(Math.random() * 100) + 20,
       },
     };
     
-    const a = ImageAnalyzer.analyseImage(newPhoto.uri)
+    
 
     const current = await getPhotos();
     const updated = [newPhoto, ...current];

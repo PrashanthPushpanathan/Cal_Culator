@@ -52,7 +52,7 @@ export class ImageAnalyzer {
                 BUT YOUR RESPONSE IS ALWAYS IN THIS JSON (WITH THESE EXACT PROPERTIES).`,
             name: "FoodAnalyser",
             tools: [{ type: "code_interpreter" }],
-            model: "gpt-4o",
+            model: "gpt-4.1-mini",
             response_format: {
                 type: "json_schema",
                 json_schema: {
