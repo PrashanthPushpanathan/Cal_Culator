@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';  // Importiere OpenAI-Paket
 import * as FileSystem from 'expo-file-system';
+import Constants from 'expo-constants';
 
 // Define the structure of the Nutrients object (all in grams)
 type Nutrients = {
@@ -8,6 +9,7 @@ type Nutrients = {
     fat: number;
     carbohydrates: number;
 };
+
 
 // Convert the image to base64
 async function getImgInBase64(imageUri: string): Promise<string> {
@@ -22,11 +24,13 @@ async function getImgInBase64(imageUri: string): Promise<string> {
         throw error;
     }
 }
+// Get Token form config
+const apiToken = Constants.expoConfig?.extra?.GptToken;
 
 // Definiere die Klasse für die Bildanalyse
 export class ImageAnalyzer {
     private static openAI = new OpenAI({
-        apiKey: '', // Replace with your OpenAI API key
+        apiKey: apiToken,
     });
 
     // Function to create the assistant (this is not used in your `analyseImage` method but could be useful to set up an assistant)
