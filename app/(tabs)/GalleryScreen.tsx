@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getPhotos, deletePhoto } from '../utils/storage';
 import { useFocusEffect, router, useLocalSearchParams } from 'expo-router';
 
+// PhotoItem type definition
 type PhotoItem = {
   key: string;
   uri: string;
@@ -24,7 +25,7 @@ type PhotoItem = {
   };
 };
 
-
+// Define MacroBar component for View
 const MacroBar = ({ label, current, goal, color }: { label: string; current: number; goal: number; color: string }) => {
   const percent = Math.min(current / goal, 1);
   return (
@@ -40,6 +41,7 @@ const MacroBar = ({ label, current, goal, color }: { label: string; current: num
   );
 };
 
+// Define ProgressCircle component for View
 const ProgressCircle = ({
   size,
   strokeWidth,
@@ -98,6 +100,7 @@ const ProgressCircle = ({
   );
 };
 
+// GalleryScreen page: displays photo gallery with nutrition tracking
 export default function GalleryScreen() {
   const { calories, protein, fats, carbs, daysLeft } = useLocalSearchParams();
   const calorieGoal = parseInt(calories as string) || 1000;
@@ -126,6 +129,7 @@ export default function GalleryScreen() {
     }
   };
 
+    //Load photos
   useFocusEffect(
     useCallback(() => {
       loadPhotos();
@@ -149,6 +153,7 @@ export default function GalleryScreen() {
   const fatsProgress = Math.min(total.fats / goalFats, 1);
   const carbsProgress = Math.min(total.carbs / goalCarbs, 1);
 
+    //handle delete photo
   const handleDelete = async (key: string) => {
     try {
       await deletePhoto(key);
@@ -158,6 +163,7 @@ export default function GalleryScreen() {
     }
   };
 
+    // View
   return (
     <View style={styles.container}>
       {/* Days Left */}
@@ -247,7 +253,7 @@ export default function GalleryScreen() {
   );
 }
 
-
+//Styles
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black', paddingTop: 40 },
   header: {

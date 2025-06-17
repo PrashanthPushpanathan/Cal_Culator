@@ -13,7 +13,8 @@ import { useLocalSearchParams, router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const PHOTOS_KEY = 'SAVED_PHOTOS';
 
-const saveUpdatedNutrition = async (photoKey: string, updatedNutrition: any) => {
+    // Function to save updated nutrition info to AsyncStorage
+const saveUpdatedNutrition = async (photoKey: string, updatedNutrition: any) => { 
   try {
     const json = await AsyncStorage.getItem(PHOTOS_KEY);
     const photos = json ? JSON.parse(json) : [];
@@ -29,6 +30,7 @@ const saveUpdatedNutrition = async (photoKey: string, updatedNutrition: any) => 
   }
 };
 
+// PhotoViewer page: view image from local storage and edit nutrition info
 export default function PhotoViewer() {
   const { photo } = useLocalSearchParams();
   const photoData = JSON.parse(photo as string);
@@ -41,14 +43,18 @@ export default function PhotoViewer() {
     carbs: 60,
   };
 
+  // State to manage edit mode and nutrition data
   const [editMode, setEditMode] = useState(false);
+  // the nutrition to the displayed image
   const [nutrition, setNutrition] = useState(defaultNutrition);
 
+  // handle change: set nutrition 
   const handleChange = (field: string, value: string) => {
     setNutrition({ ...nutrition, [field]: parseInt(value) || 0 });
   };
 
-  return (
+// View
+return ( 
     <SafeAreaView style={styles.container}>
       <View style={styles.imageContainer}>
         <Image source={{ uri }} style={styles.image} />
@@ -63,7 +69,7 @@ export default function PhotoViewer() {
           <TouchableOpacity
             onPress={async () => {
               if (editMode) {
-                await saveUpdatedNutrition(key, nutrition); // save when exiting edit mode
+                await saveUpdatedNutrition(key, nutrition);  // Save when exiting edit mode
               }
               setEditMode(!editMode);
             }}>
@@ -71,25 +77,27 @@ export default function PhotoViewer() {
           <TouchableOpacity
             onPress={async () => {
               if (editMode) {
-                await saveUpdatedNutrition(key, nutrition); // save when exiting edit mode
+                await saveUpdatedNutrition(key, nutrition); // Save when exiting edit mode
               }
               setEditMode(!editMode);
             }}>
             <Ionicons name={editMode ? 'checkmark' : 'create-outline'} size={24} color="#00BFFF" />
           </TouchableOpacity>
         </View>
-
-      {editMode ? (
-         <View style={styles.caloriesInputRow}>
-            <TextInput
-              style={styles.caloriesInput}
-              keyboardType="numeric"
-              value={nutrition['calories'].toString()}
-              onChangeText={(value) => handleChange('calories', value)}
-            />
-            <Text style={styles.kcalLabel}>kcal</Text>
-          </View>
+              
+        {editMode ? ( 
+        // Edit
+        <View style={styles.caloriesInputRow}>
+        <TextInput
+            style={styles.caloriesInput}
+            keyboardType="numeric"
+            value={nutrition['calories'].toString()}
+            onChangeText={(value) => handleChange('calories', value)}
+        />
+        <Text style={styles.kcalLabel}>kcal</Text>
+        </View>
       ):(
+        // Display
         <Text style={styles.caloriesText}>{nutrition.calories} kcal</Text>
       )}
 
@@ -97,6 +105,7 @@ export default function PhotoViewer() {
           <View key={macro} style={styles.macroRow}>
             <Text style={styles.macroLabel}>{macro.charAt(0).toUpperCase() + macro.slice(1)}:</Text>
             {editMode ? (
+              //Edit
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
@@ -104,16 +113,18 @@ export default function PhotoViewer() {
                 onChangeText={(value) => handleChange(macro, value)}
               />
             ) : (
+              // Display
               <Text style={styles.macroValue}>{nutrition[macro]}g</Text>
             )}
           </View>
         ))}
       </View>
     </SafeAreaView>
-  );
+    );
 }
 
-const styles = StyleSheet.create({
+// Styles
+const styles = StyleSheet.create({ 
   container: { flex: 1, backgroundColor: 'black' },
   imageContainer: {
     flex: 0.4,

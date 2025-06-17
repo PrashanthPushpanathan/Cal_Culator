@@ -27,53 +27,12 @@ async function getImgInBase64(imageUri: string): Promise<string> {
 // Get Token form config
 const apiToken = Constants.expoConfig?.extra?.GptToken;
 
-// Definiere die Klasse für die Bildanalyse
+// ImageAnalyzer util: analyzes an image using OpenAI's GPT model to extract nutritional information
 export class ImageAnalyzer {
     private static openAI = new OpenAI({
         apiKey: apiToken,
     });
-
-    // Function to create the assistant (this is not used in your `analyseImage` method but could be useful to set up an assistant)
-    public static async createAssistant() {
-        const analyseFoodImage = await this.openAI.beta.assistants.create({
-            instructions: `You are a food analysis Bot. Your responses all have the exact same structure. 
-                You are given Images and you will give a JSON response in which you contain the following properties:
-                calories (as calories), protein (in grams), fat (in grams), carbohydrates (in grams)
-                They are displayed like this:
-                {
-                    "calories": 300,
-                    "protein": 10,
-                    "fat": 20,
-                    "carbohydrates": 40
-                }
-                If you can't identify the food, just put four Zeros.
-                {
-                    "calories": 0,
-                    "protein": 0,
-                    "fat": 0,
-                    "carbohydrates": 0
-                }
-                BUT YOUR RESPONSE IS ALWAYS IN THIS JSON (WITH THESE EXACT PROPERTIES).`,
-            name: "FoodAnalyser",
-            tools: [{ type: "code_interpreter" }],
-            model: "gpt-4.1-mini",
-            response_format: {
-                type: "json_schema",
-                json_schema: {
-                    name: "Nutrients",
-                    schema: {
-                        calories: { type: "number" },
-                        protein: { type: "number" },
-                        fat: { type: "number" },
-                        carbohydrates: { type: "number" },
-                        additionalProperties: false
-                    },
-                    strict: true
-                },
-            }
-        });
-    }
-
+    
     // Function to analyze an image
     public static async analyseImage(imageUrl: string): Promise<Nutrients> {
         try {
@@ -87,12 +46,15 @@ export class ImageAnalyzer {
                         content: [
                             { 
                                 type: "text", 
-                                text: `Analyze this food image and return ONLY a JSON object with these exact properties:
+                                text: `
+                                Analyze this food image and return ONLY a JSON object with these exact properties:
                                 - calories (number)
                                 - protein (number, grams)
                                 - fat (number, grams)
                                 - carbohydrates (number, grams)
-                                
+
+                                Do the whole Produkt and not per 100g.
+
                                 Example response:
                                 {
                                     "calories": 300,
