@@ -41,7 +41,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "GptToken": "", // Add Token here
+      "GptToken": "",
       "router": {},
       "eas": {
         "slug": "Cal-Culator",
