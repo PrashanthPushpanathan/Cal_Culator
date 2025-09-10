@@ -1,11 +1,6 @@
 # CalCulator
-
 ## Was ist CalCulator
-### Ziele
-[Mehr](./docs/Ziele_Anforderungen.md)
-
-### Interviews
-[Mehr](./docs/Interviews.md)
+Lerne mehr über Cal-Culator im [Wiki](https://github.com/PrashanthPushpanathan/Cal_Culator/wiki).
 
 ## Start App
 ### Expo
