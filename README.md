@@ -4,4 +4,4 @@ Lerne mehr über Cal-Culator im [Wiki](https://github.com/PrashanthPushpanathan/
 
 ## Start App
 ### Expo
-[Mehr](./docs/GetStarted/HowToExpo.md)
+[Mehr](./docs/StartExpo.md)
