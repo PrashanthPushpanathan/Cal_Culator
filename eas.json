@@ -1,21 +1,19 @@
 {
   "cli": {
-    "version": ">= 16.6.1",
-    "appVersionSource": "remote"
+    "version": "latest" // Hier kannst du die Version der eas-cli angeben
   },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal"
-    },
-    "production": {
-      "autoIncrement": true
+  "builds": {
+    "android": {
+      "development": {
+        "workflow": "managed", // Verwende 'managed', wenn du Expo verwaltest
+        "node": "lts", // Verwendet Node LTS
+        "platform": "android"
+      },
+      "production": {
+        "workflow": "managed", // Konfiguration für den Produktionsbuild
+        "node": "lts", // Verwendet Node LTS
+        "platform": "android"
+      }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
