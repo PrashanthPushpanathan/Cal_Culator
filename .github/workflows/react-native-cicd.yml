@@ -24,7 +24,7 @@ on:
          - prod-apk
          - all
 env:
- EXPO_TOKEN: ${{ secrets.jpAmLwCl7sc_4i0vVl99BI7NuyxnsABZNoFSMAem }}
+ EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
  NODE_OPTIONS: --openssl-legacy-provider
 jobs:
  check-skip:
