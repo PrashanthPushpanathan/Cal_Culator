@@ -1,19 +1,19 @@
 {
-  "cli": {
-    "version": "latest" // Hier kannst du die Version der eas-cli angeben
-  },
-  "builds": {
-    "android": {
-      "development": {
-        "workflow": "managed", // Verwende 'managed', wenn du Expo verwaltest
-        "node": "lts", // Verwendet Node LTS
-        "platform": "android"
-      },
-      "production": {
-        "workflow": "managed", // Konfiguration für den Produktionsbuild
-        "node": "lts", // Verwendet Node LTS
-        "platform": "android"
-      }
-    }
-  }
+ "cli": {
+   "version": "latest"  // This ensures that the latest EAS CLI version is used
+ },
+ "build": {
+   "android": {
+     "development": {
+       "workflow": "managed",  // Make sure the workflow is set to 'managed' if using Expo managed workflow
+       "node": "lts",          // Node version to use
+       "platform": "android"
+     },
+     "production": {
+       "workflow": "managed",  // Same for production profile
+       "node": "lts",          // Node version to use
+       "platform": "android"
+     }
+   }
+ }
 }
