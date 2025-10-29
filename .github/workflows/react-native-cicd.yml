@@ -45,6 +45,25 @@ jobs:
           node-version: "20"
           cache: "yarn"
 
+      - name: 📦 Enable Corepack and Yarn classic
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
+
+      - name: 📦 Ensure Yarn lockfile (convert or create if missing)
+        run: |
+          if [ ! -f yarn.lock ]; then
+          if [ -f package-lock.json ]; then
+          echo "Converting package-lock.json -> yarn.lock"
+          yarn import || true
+          else
+          echo "No lockfile found. Generating yarn.lock"
+          yarn install
+          fi
+          fi
+
+
       - name: 📦 Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
