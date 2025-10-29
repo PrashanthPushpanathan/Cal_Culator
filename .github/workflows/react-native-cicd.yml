@@ -17,7 +17,6 @@ on:
         options:
           - dev
           - prod-apk
-          - publish-expo
           - all
 
 env:
@@ -145,13 +144,6 @@ jobs:
           eas build --platform android --profile production-apk --local --non-interactive --output=./app-prod.apk
         env:
           NODE_ENV: production
-
-      - name: 🚀 Publish to Expo
-        if: github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'publish-expo'
-        run: |
-          eas update --auto
-        env:
-          EXPO_TOKEN: ${{ secrets.jpAmLwCl7sc_4i0vVl99BI7NuyxnsABZNoFSMAem }}
 
       - name: 📦 Upload build artifacts to GitHub
         uses: actions/upload-artifact@v4
