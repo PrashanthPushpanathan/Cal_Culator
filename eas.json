@@ -1,18 +1,18 @@
 {
  "cli": {
-   "version": "latest"  // This ensures that the latest EAS CLI version is used
+   "version": "latest"
  },
  "build": {
    "android": {
      "development": {
-       "workflow": "managed",  // Make sure the workflow is set to 'managed' if using Expo managed workflow
-       "node": "lts",          // Node version to use
-       "platform": "android"
+       "buildType": "apk",           // Specify the build type: 'apk' or 'app-bundle'
+       "releaseChannel": "development",  // Optional: set the release channel for the build
+       "node": "lts"                 // Ensure compatibility with the Node version
      },
      "production": {
-       "workflow": "managed",  // Same for production profile
-       "node": "lts",          // Node version to use
-       "platform": "android"
+       "buildType": "app-bundle",     // App Bundle for production builds
+       "releaseChannel": "default",   // Production release channel
+       "node": "lts"
      }
    }
  }
