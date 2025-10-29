@@ -1,19 +1,12 @@
 {
- "cli": {
-   "version": "latest"
- },
- "build": {
-   "android": {
-     "development": {
-       "buildType": "apk",           // Specify the build type: 'apk' or 'app-bundle'
-       "releaseChannel": "development",  // Optional: set the release channel for the build
-       "node": "lts"                 // Ensure compatibility with the Node version
-     },
-     "production": {
-       "buildType": "app-bundle",     // App Bundle for production builds
-       "releaseChannel": "default",   // Production release channel
-       "node": "lts"
-     }
-   }
- }
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {}
+  }
 }
