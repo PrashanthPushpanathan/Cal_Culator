@@ -1,51 +1,56 @@
-# Welcome to your Expo app 👋
+# CalCulator
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Was ist CalCulator
+Lerne mehr über Cal-Culator im [Wiki](https://github.com/PrashanthPushpanathan/Cal_Culator/wiki).
 
-## Get started
+CalCulator ist eine mobile Anwendung zur Ernährungsanalyse. Sie ermöglicht es Benutzern, Lebensmittel zu scannen oder manuell einzugeben, um Nährwertinformationen wie Kalorien, Proteine, Fette und Kohlenhydrate zu erhalten.
 
-1. Install dependencies
+## Features
 
+- 𝄃𝄃𝄂𝄂𝄀𝄁𝄃𝄂𝄂𝄃 **Barcode Scannen für Lebensmittel:** Die Kamera erkennt den Barcode eines Lebensmittels und fügt das Produkt direkt zum Ernährungskalender hinzu, um die Mahlzeiten zu dokumentieren.
+
+- 💾 **Speichern aller Nährwerte und Inhaltsstoffe:** Jedes gescannte oder manuell eingegebene Lebensmittel wird mit allen relevanten Nährwerten und Inhaltsstoffen gespeichert, um eine präzisere Dokumentation der Mahlzeiten zu ermöglichen.
+
+- 📅 **Kalenderansicht für Ernährungshistorie:** Benutzer können auf einen Kalender zugreifen, der vergangene Mahlzeiten und die zugehörigen Kalorien anzeigt. Dies bietet einen klaren Überblick über die Ernährungsgewohnheiten.
+
+- **Farbliche Markierung der Kaloriendaten:** Tage, an denen das Kalorienziel überschritten wurde, werden rot markiert, während Tage, an denen das Ziel eingehalten wurde, grün angezeigt werden, um eine schnelle visuelle Rückmeldung zur Einhaltung des Kalorienziels zu bieten.
+
+- 🔥 **Tägliche Schrittzählung und Kalorienverbrauch:** Die App berechnet und zeigt den Kalorienverbrauch basierend auf den täglichen Schritten des Benutzers und persönlichen Daten wie Gewicht, Größe und Alter an.
+
+- ⌕ **Lebensmittel-Suchfunktion (Food API Integration):** Benutzer können Lebensmittel suchen, um die Nährwertinformationen schnell zu finden und in ihren Ernährungskalender aufzunehmen.
+
+- ⚠️ **Allergie-Management mit AI-Unterstützung:** Die App ermöglicht es Benutzern, ihre Allergien zu hinterlegen. Wenn ein Lebensmittel hinzugefügt wird, prüft die AI, ob es Inhaltsstoffe enthält, die den Allergien des Benutzers entsprechen und warnt bei einem Allergieverdacht.
+
+- 🔐 **Login und Benutzerverwaltung:** Ein sicherer Login- und Registrierungsprozess ermöglicht es neuen Benutzern, ein Konto zu erstellen, ihre persönlichen Daten zu speichern und sich sicher anzumelden.
+
+## Start App
+### Expo
+[Mehr](./docs/StartExpo.md)
+
+1. **Installiere Abhängigkeiten:**
    ```bash
    npm install
-   ```
 
-2. Start the app
+2. **Starte die App:**
+   `npx expo start`
+   
+Im Output wirst du Optionen finden, die App in einem Entwicklungsbuild, Android Emulator, iOS Simulator oder mit Expo Go zu öffnen.
 
-   ```bash
-    npx expo start
-   ```
+## Tech Stack
+- **Frontend:** React Native
+- **Backend:** Node.js, OpenAI API (Bildanalyse)
+- **Datenbank:** AsyncStorage (für lokale Speicherung)
+- **Sicherheit:** JWT, OAuth 2.0, TLS/SSL Verschlüsselung
 
-In the output, you'll find options to open the app in a
+## Lizenz
+CalCulator ist unter der [MIT Lizenz](LICENSE) lizenziert.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Contributing
+1. Forke das Repository.
+2. Erstelle einen neuen Branch für deine Änderungen (`git checkout -b feature-xyz`).
+3. Committe deine Änderungen (`git commit -am 'Add new feature'`).
+4. Push den Branch (`git push origin feature-xyz`).
+5. Erstelle einen Pull Request.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# Cal_Culator
+## Kontakt
+Für Fragen oder Unterstützung, kontaktiere uns über das [Projekt-Repository](https://github.com/PrashanthPushpanathan/Cal_Culator).
