@@ -106,12 +106,6 @@ jobs:
             echo "metro.config.js not found"
           fi
 
-     - name: 🔑 EAS login
-       run: eas login --token ${{ secrets.EXPO_TOKEN }}
-     - name: 🏗 Install deps
-       run: |
-        npm ci
-        npm i -g eas-cli@latest
      - name: 📦 Dev APK (remote)
        if: github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev' || github.event_name == 'push'
        run: |
