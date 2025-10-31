@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Cal-Culator",
-    "slug": "Cal-Culator",
+    "slug": "cal-culator",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ppu140818.CalCulator"
+      "package": "com.ppu140818.calculator"
     },
     "web": {
       "bundler": "metro",
@@ -44,7 +44,7 @@
       "GptToken": "",
       "router": {},
       "eas": {
-        "slug": "Cal-Culator",
+        "slug": "cal-culator",
         "projectId": "9de89a78-6872-4ccc-b45f-74b497c3a7dc"
       }
     }
