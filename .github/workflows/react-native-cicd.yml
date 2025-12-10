@@ -91,7 +91,7 @@ jobs:
             cp ./metro.config.js ./metro.config.js.backup
             echo "Updating metro.config.js to CommonJS format"
             cat > ./metro.config.js << 'EOFMARKER'
-/* eslint-disable @typescript-eslint/no-var-requires */
+
 const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
