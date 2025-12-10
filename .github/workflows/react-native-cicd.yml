@@ -53,7 +53,7 @@ jobs:
       - name: 📦 Install dependencies using npm
         run: |
           npm install
-          npm install -g eas-cli@latest  # Install eas-cli globally
+          npm install -g eas-cli@latest
 
       - name: 📱 Setup EAS build cache
         uses: actions/cache@v3
@@ -90,27 +90,30 @@ jobs:
             echo "Creating backup of metro.config.js"
             cp ./metro.config.js ./metro.config.js.backup
             echo "Updating metro.config.js to CommonJS format"
-            cat > ./metro.config.js << 'EOFMARKER'
+            
+            # EOFMARKER ve içerik bilerek en sola yaslanmıştır, 
+            # sakın boşluk (indentation) eklemeyin.
+          cat > ./metro.config.js << 'EOFMARKER'
+          const { getDefaultConfig } = require('expo/metro-config');
 
-const { getDefaultConfig } = require('expo/metro-config');
+          const config = getDefaultConfig(__dirname);
 
-const config = getDefaultConfig(__dirname);
+          const { transformer, resolver } = config;
 
-const { transformer, resolver } = config;
+          config.transformer = {
+            ...transformer,
+            babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
+          };
 
-config.transformer = {
-  ...transformer,
-  babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
-};
+          config.resolver = {
+            ...resolver,
+            assetExts: resolver.assetExts.filter(ext => ext !== 'svg'),
+            sourceExts: [...resolver.sourceExts, 'svg'],
+          };
 
-config.resolver = {
-  ...resolver,
-  assetExts: resolver.assetExts.filter(ext => ext !== 'svg'),
-  sourceExts: [...resolver.sourceExts, 'svg'],
-};
+          module.exports = config;
+          EOFMARKER
 
-module.exports = config;
-EOFMARKER
             echo "metro.config.js updated to CommonJS format"
           else
             echo "metro.config.js not found"
@@ -120,6 +123,7 @@ EOFMARKER
         if: github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev' || github.event_name == 'push'
         run: |
           export NODE_OPTIONS="--openssl-legacy-provider --max_old_space_size=4096"
+          # Not: Remote build APK indirmez, artifact için --local veya output gerekir.
           eas build --platform android --profile development --non-interactive
 
       - name: 📦 Prod bundle (remote)
