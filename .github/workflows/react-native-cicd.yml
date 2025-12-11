@@ -2,28 +2,19 @@ name: React Native CI/CD
 
 on:
   push:
-    branches:
-      - main
-      - master
-      - tempdev_pp
+    branches: [ main, master, tempdev_pp ]
     paths-ignore:
       - "**.md"
       - "LICENSE"
       - "docs/**"
   pull_request:
-    branches:
-      - main
-      - master
-      - tempdev_pp
+    branches: [ main, master, tempdev_pp ]
   workflow_dispatch:
     inputs:
       buildType:
         type: choice
         description: "Build type to run"
-        options:
-          - dev
-          - prod-apk
-          - all
+        options: [ dev, prod-apk, all ]
 
 env:
   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -34,8 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
-      - name: Skip CI check
-        run: echo "Proceeding with workflow"
+      - run: echo "Proceeding with workflow"
 
   build-and-deploy:
     needs: check-skip
@@ -48,95 +38,22 @@ jobs:
       - name: 🏗 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" 
+          node-version: "20"
 
-      - name: 📦 Install dependencies using npm
-        run: |
-          npm install
-          # Metro config SVG ayarı için gerekli paketleri build anında ekliyoruz:
-          npm install react-native-svg react-native-svg-transformer --save
-          npm install -g eas-cli@latest
+      - name: 📦 Install dependencies
+        run: npm ci
 
-      - name: 📱 Setup EAS build cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.eas-build-local
-          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('**/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-eas-build-local-
-
-      - name: 🔄 Verify EAS CLI installation
-        run: |
-          echo "EAS CLI version:"
-          eas --version
-
-      - name: 📋 Fix package.json main entry
-        run: |
-          if ! command -v jq &> /dev/null; then
-            echo "Installing jq..."
-            sudo apt-get update && sudo apt-get install -y jq
-          fi
-          if [ -f ./package.json ]; then
-            cp package.json package.json.bak
-            jq '.main = "node_modules/expo/AppEntry.js"' package.json > package.json.tmp && mv package.json.tmp package.json
-            echo "Updated package.json main entry"
-            cat package.json | grep "main"
-          else
-            echo "package.json not found"
-            exit 1
-          fi
-
-      - name: 📋 Update metro.config.js for SVG support
-        run: |
-          if [ -f ./metro.config.js ]; then
-            echo "Creating backup of metro.config.js"
-            cp ./metro.config.js ./metro.config.js.backup
-            echo "Updating metro.config.js to CommonJS format"
-            
-          # DİKKAT: Aşağıdaki satırların hizasını (indentation) bozmayın.
-          cat > ./metro.config.js << 'EOFMARKER'
-          const { getDefaultConfig } = require('expo/metro-config');
-
-          const config = getDefaultConfig(__dirname);
-
-          const { transformer, resolver } = config;
-
-          config.transformer = {
-            ...transformer,
-            babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
-          };
-
-          config.resolver = {
-            ...resolver,
-            assetExts: resolver.assetExts.filter(ext => ext !== 'svg'),
-            sourceExts: [...resolver.sourceExts, 'svg'],
-          };
-
-          module.exports = config;
-          EOFMARKER
-
-            echo "metro.config.js updated to CommonJS format"
-          else
-            echo "metro.config.js not found"
-          fi
+      - name: 🔄 Verify EAS CLI
+        run: npx eas --version
 
       - name: 📦 Dev APK (remote)
         if: github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev' || github.event_name == 'push'
         run: |
           export NODE_OPTIONS="--openssl-legacy-provider --max_old_space_size=4096"
-          eas build --platform android --profile development --non-interactive
+          npx eas build --platform android --profile development --non-interactive
 
       - name: 📦 Prod bundle (remote)
         if: github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'prod-apk' || github.event_name == 'push'
         run: |
           export NODE_OPTIONS="--openssl-legacy-provider --max_old_space_size=4096"
-          eas build --platform android --profile production --non-interactive
-
-      - name: 📦 Upload build artifacts to GitHub
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-builds
-          path: |
-            ./app-dev.apk
-            ./app-prod.apk
-          retention-days: 7
+          npx eas build --platform android --profile production --non-interactive
