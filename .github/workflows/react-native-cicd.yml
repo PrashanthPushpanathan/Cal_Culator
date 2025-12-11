@@ -1,23 +1,31 @@
-name: React Native CI/CD
+name: React Native Android CI/CD
 
 on:
   push:
-    branches: [ main, master, tempdev_pp ]
+    branches:
+      - main
+      - master
+      - tempdev_pp
     paths-ignore:
       - "**.md"
       - "LICENSE"
       - "docs/**"
   pull_request:
-    branches: [ main, master, tempdev_pp ]
+    branches:
+      - main
+      - master
+      - tempdev_pp
   workflow_dispatch:
     inputs:
       buildType:
         type: choice
         description: "Build type to run"
-        options: [ dev, prod-apk, all ]
+        options:
+          - dev
+          - prod
+          - all
 
 env:
-  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
   NODE_OPTIONS: --openssl-legacy-provider
 
 jobs:
@@ -27,10 +35,16 @@ jobs:
     steps:
       - run: echo "Proceeding with workflow"
 
-  build-and-deploy:
+  android-build:
     needs: check-skip
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/tempdev_pp')) || github.event_name == 'workflow_dispatch'
+    if: >
+      (github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' ||
+         github.ref == 'refs/heads/master' ||
+         github.ref == 'refs/heads/tempdev_pp')) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+
     steps:
       - name: 🏗 Checkout repository
         uses: actions/checkout@v4
@@ -40,20 +54,55 @@ jobs:
         with:
           node-version: "20"
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install JS dependencies
         run: npm ci
 
-      - name: 🔄 Verify EAS CLI
-        run: npx eas --version
+      - name: 🧰 Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-      - name: 📦 Dev APK (remote)
-        if: github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev' || github.event_name == 'push'
-        run: |
-          export NODE_OPTIONS="--openssl-legacy-provider --max_old_space_size=4096"
-          npx eas build --platform android --profile development --non-interactive
+      - name: 🧰 Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          build-tools: 34.0.0
 
-      - name: 📦 Prod bundle (remote)
-        if: github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'prod-apk' || github.event_name == 'push'
+      - name: 🧱 Prebuild Android project (Expo)
         run: |
-          export NODE_OPTIONS="--openssl-legacy-provider --max_old_space_size=4096"
-          npx eas build --platform android --profile production --non-interactive
+          npx expo prebuild --platform android --non-interactive --clean
+
+      # DEV APK (debug)
+      - name: 📦 Build Dev APK (assembleDebug)
+        if: github.event_name == 'push' ||
+            github.event.inputs.buildType == 'all' ||
+            github.event.inputs.buildType == 'dev'
+        run: |
+          cd android
+          ./gradlew assembleDebug
+          cd ..
+          mkdir -p build-artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
+
+      # PROD release (AAB + APK)
+      - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
+        if: github.event_name == 'push' ||
+            github.event.inputs.buildType == 'all' ||
+            github.event.inputs.buildType == 'prod'
+        run: |
+          cd android
+          ./gradlew bundleRelease assembleRelease
+          cd ..
+          mkdir -p build-artifacts
+          cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
+          cp android/app/build/outputs/apk/release/app-release.apk build-artifacts/app-prod.apk
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds
+          path: build-artifacts/*
+          retention-days: 7
