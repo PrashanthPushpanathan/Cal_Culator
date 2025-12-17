@@ -53,7 +53,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
+          
+      - name: Set API Key in app.json
+        run: |
+          jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
+          
       - name: 📦 Install JS dependencies
         run: npm ci
 
