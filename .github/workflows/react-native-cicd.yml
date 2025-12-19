@@ -69,7 +69,7 @@ jobs:
         run: npm run test:ci
 
   android-build:
-    needs: [check-skip,lint]
+    needs: [check-skip,lint,test]
     if: >
       (github.event_name == 'push' &&
         (github.ref == 'refs/heads/main' ||
