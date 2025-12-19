@@ -36,7 +36,7 @@ jobs:
       - run: echo "Proceeding with workflow"
   
   android-build:
-    needs: [check-skip,lint]
+    needs: check-skip
     if: >
       (github.event_name == 'push' &&
         (github.ref == 'refs/heads/main' ||
