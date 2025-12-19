@@ -7,9 +7,9 @@ on:
       - master
       - tempdev_pp
     paths-ignore:
-      - "**.md"
-      - "LICENSE"
-      - "docs/**"
+      - '**.md'
+      - 'LICENSE'
+      - 'docs/**'
   pull_request:
     branches:
       - main
@@ -19,7 +19,7 @@ on:
     inputs:
       buildType:
         type: choice
-        description: "Build type to run"
+        description: 'Build type to run'
         options:
           - dev
           - prod
@@ -34,9 +34,9 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - run: echo "Proceeding with workflow"
-
+  
   android-build:
-    needs: check-skip
+    needs: [check-skip,lint]
     if: >
       (github.event_name == 'push' &&
         (github.ref == 'refs/heads/main' ||
@@ -44,7 +44,6 @@ jobs:
          github.ref == 'refs/heads/tempdev_pp')) ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-
     steps:
       - name: 🏗 Checkout repository
         uses: actions/checkout@v4
@@ -52,12 +51,12 @@ jobs:
       - name: 🏗 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          
+          node-version: '20'
+
       - name: Set API Key in app.json
         run: |
           jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
-          
+
       - name: 📦 Install JS dependencies
         run: npm ci
 
@@ -65,7 +64,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
       - name: 🧰 Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -82,8 +81,8 @@ jobs:
       # DEV APK (debug)
       - name: 📦 Build Dev APK (assembleDebug)
         if: github.event_name == 'push' ||
-            github.event.inputs.buildType == 'all' ||
-            github.event.inputs.buildType == 'dev'
+          github.event.inputs.buildType == 'all' ||
+          github.event.inputs.buildType == 'dev'
         run: |
           cd android
           ./gradlew assembleDebug
@@ -94,8 +93,8 @@ jobs:
       # PROD release (AAB + APK)
       - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
         if: github.event_name == 'push' ||
-            github.event.inputs.buildType == 'all' ||
-            github.event.inputs.buildType == 'prod'
+          github.event.inputs.buildType == 'all' ||
+          github.event.inputs.buildType == 'prod'
         run: |
           cd android
           ./gradlew bundleRelease assembleRelease

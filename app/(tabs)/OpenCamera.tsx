@@ -12,7 +12,7 @@ export default function OpenCamera() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [facing, setFacing] = useState<'front' | 'back'>('back');
 
-    // Check for camera permissions
+  // Check for camera permissions
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -20,7 +20,7 @@ export default function OpenCamera() {
     })();
   }, []);
 
-   // Function to take a picture and save it
+  // Function to take a picture and save it
   const takePictureAndSave = async () => {
     if (!cameraRef.current) {
       Alert.alert('Error', 'Camera not ready');
@@ -34,14 +34,14 @@ export default function OpenCamera() {
       await storePhoto(photo.uri);
       Alert.alert('Success', 'Photo saved!', [
         { text: 'View Gallery', onPress: () => router.push('/(tabs)/GalleryScreen') },
-        { text: 'Keep Shooting', style: 'cancel' }
+        { text: 'Keep Shooting', style: 'cancel' },
       ]);
     } catch (error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save photo');
     }
   };
 
-    // Function to pick an image from the phone gallery and save it
+  // Function to pick an image from the phone gallery and save it
   const pickImageFromLibrary = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -54,7 +54,7 @@ export default function OpenCamera() {
         await storePhoto(uri);
         Alert.alert('Success', 'Image saved from gallery!', [
           { text: 'View Gallery', onPress: () => router.push('/(tabs)/GalleryScreen') },
-          { text: 'Pick Another', style: 'cancel' }
+          { text: 'Pick Another', style: 'cancel' },
         ]);
       } catch (error) {
         Alert.alert('Error', 'Failed to save image');
@@ -62,16 +62,24 @@ export default function OpenCamera() {
     }
   };
 
-    // Render the camera view or permission status
+  // Render the camera view or permission status
   if (hasPermission === null) {
-    return <View style={styles.container}><Text>Requesting permission...</Text></View>;
+    return (
+      <View style={styles.container}>
+        <Text>Requesting permission...</Text>
+      </View>
+    );
   }
 
   if (hasPermission === false) {
-    return <View style={styles.container}><Text>Camera permission denied</Text></View>;
+    return (
+      <View style={styles.container}>
+        <Text>Camera permission denied</Text>
+      </View>
+    );
   }
 
-    // View
+  // View
   return (
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
@@ -88,15 +96,12 @@ export default function OpenCamera() {
 
           <TouchableOpacity
             style={styles.flipButton}
-            onPress={() => setFacing(f => f === 'back' ? 'front' : 'back')}
+            onPress={() => setFacing((f) => (f === 'back' ? 'front' : 'back'))}
           >
             <Ionicons name="camera-reverse" size={24} color="white" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.galleryButton}
-            onPress={pickImageFromLibrary}
-          >
+          <TouchableOpacity style={styles.galleryButton} onPress={pickImageFromLibrary}>
             <Ionicons name="images" size={24} color="white" />
           </TouchableOpacity>
         </View>

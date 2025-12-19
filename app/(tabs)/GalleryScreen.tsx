@@ -1,13 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { getPhotos, deletePhoto } from '../utils/storage';
@@ -26,13 +18,25 @@ type PhotoItem = {
 };
 
 // Define MacroBar component for View
-const MacroBar = ({ label, current, goal, color }: { label: string; current: number; goal: number; color: string }) => {
+const MacroBar = ({
+  label,
+  current,
+  goal,
+  color,
+}: {
+  label: string;
+  current: number;
+  goal: number;
+  color: string;
+}) => {
   const percent = Math.min(current / goal, 1);
   return (
     <View style={styles.macroBarContainer}>
       <View style={styles.macroLabelRow}>
         <Text style={styles.macroLabel}>{label}</Text>
-        <Text style={styles.macroNumbers}>{current} / {goal}g</Text>
+        <Text style={styles.macroNumbers}>
+          {current} / {goal}g
+        </Text>
       </View>
       <View style={styles.barBackground}>
         <View style={[styles.barFill, { width: `${percent * 100}%`, backgroundColor: color }]} />
@@ -78,7 +82,7 @@ const ProgressCircle = ({
           strokeWidth={strokeWidth}
         />
         <Circle
-          stroke={dynamicColor} 
+          stroke={dynamicColor}
           fill="none"
           cx={size / 2}
           cy={size / 2}
@@ -129,11 +133,11 @@ export default function GalleryScreen() {
     }
   };
 
-    //Load photos
+  //Load photos
   useFocusEffect(
     useCallback(() => {
       loadPhotos();
-    }, [])
+    }, []),
   );
 
   // Calculate totals when photos are loaded
@@ -145,7 +149,7 @@ export default function GalleryScreen() {
       acc.carbs += photo.nutrition.carbs;
       return acc;
     },
-    { calories: 0, protein: 0, fats: 0, carbs: 0 }
+    { calories: 0, protein: 0, fats: 0, carbs: 0 },
   );
 
   const calorieProgress = Math.min(total.calories / goalCalories, 1);
@@ -153,7 +157,7 @@ export default function GalleryScreen() {
   const fatsProgress = Math.min(total.fats / goalFats, 1);
   const carbsProgress = Math.min(total.carbs / goalCarbs, 1);
 
-    //handle delete photo
+  //handle delete photo
   const handleDelete = async (key: string) => {
     try {
       await deletePhoto(key);
@@ -163,7 +167,7 @@ export default function GalleryScreen() {
     }
   };
 
-    // View
+  // View
   return (
     <View style={styles.container}>
       {/* Days Left */}
@@ -231,10 +235,7 @@ export default function GalleryScreen() {
               >
                 <Image source={{ uri: item.uri }} style={styles.photo} />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDelete(item.key)}
-              >
+              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.key)}>
                 <Ionicons name="trash" size={16} color="white" />
               </TouchableOpacity>
             </View>
@@ -243,10 +244,7 @@ export default function GalleryScreen() {
       )}
 
       {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => router.push('/(tabs)/OpenCamera')}
-      >
+      <TouchableOpacity style={styles.fab} onPress={() => router.push('/(tabs)/OpenCamera')}>
         <Ionicons name="camera" size={30} color="white" />
       </TouchableOpacity>
     </View>
@@ -278,14 +276,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   daysLeftContainer: {
-  alignItems: 'center',
-  paddingTop: 10,
-},
-daysLeftText: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  color: '#00BFFF',
-},
+    alignItems: 'center',
+    paddingTop: 10,
+  },
+  daysLeftText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#00BFFF',
+  },
 
   circleText: {
     fontSize: 32,

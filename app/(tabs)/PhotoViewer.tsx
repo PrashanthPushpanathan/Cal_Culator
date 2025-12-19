@@ -13,14 +13,14 @@ import { useLocalSearchParams, router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const PHOTOS_KEY = 'SAVED_PHOTOS';
 
-    // Function to save updated nutrition info to AsyncStorage
-const saveUpdatedNutrition = async (photoKey: string, updatedNutrition: any) => { 
+// Function to save updated nutrition info to AsyncStorage
+const saveUpdatedNutrition = async (photoKey: string, updatedNutrition: any) => {
   try {
     const json = await AsyncStorage.getItem(PHOTOS_KEY);
     const photos = json ? JSON.parse(json) : [];
 
     const updatedPhotos = photos.map((p: any) =>
-      p.key === photoKey ? { ...p, nutrition: updatedNutrition } : p
+      p.key === photoKey ? { ...p, nutrition: updatedNutrition } : p,
     );
 
     await AsyncStorage.setItem(PHOTOS_KEY, JSON.stringify(updatedPhotos));
@@ -48,13 +48,13 @@ export default function PhotoViewer() {
   // the nutrition to the displayed image
   const [nutrition, setNutrition] = useState(defaultNutrition);
 
-  // handle change: set nutrition 
+  // handle change: set nutrition
   const handleChange = (field: string, value: string) => {
     setNutrition({ ...nutrition, [field]: parseInt(value) || 0 });
   };
 
-// View
-return ( 
+  // View
+  return (
     <SafeAreaView style={styles.container}>
       <View style={styles.imageContainer}>
         <Image source={{ uri }} style={styles.image} />
@@ -69,37 +69,38 @@ return (
           <TouchableOpacity
             onPress={async () => {
               if (editMode) {
-                await saveUpdatedNutrition(key, nutrition);  // Save when exiting edit mode
+                await saveUpdatedNutrition(key, nutrition); // Save when exiting edit mode
               }
               setEditMode(!editMode);
-            }}>
-          </TouchableOpacity>
+            }}
+          ></TouchableOpacity>
           <TouchableOpacity
             onPress={async () => {
               if (editMode) {
                 await saveUpdatedNutrition(key, nutrition); // Save when exiting edit mode
               }
               setEditMode(!editMode);
-            }}>
+            }}
+          >
             <Ionicons name={editMode ? 'checkmark' : 'create-outline'} size={24} color="#00BFFF" />
           </TouchableOpacity>
         </View>
-              
-        {editMode ? ( 
-        // Edit
-        <View style={styles.caloriesInputRow}>
-        <TextInput
-            style={styles.caloriesInput}
-            keyboardType="numeric"
-            value={nutrition['calories'].toString()}
-            onChangeText={(value) => handleChange('calories', value)}
-        />
-        <Text style={styles.kcalLabel}>kcal</Text>
-        </View>
-      ):(
-        // Display
-        <Text style={styles.caloriesText}>{nutrition.calories} kcal</Text>
-      )}
+
+        {editMode ? (
+          // Edit
+          <View style={styles.caloriesInputRow}>
+            <TextInput
+              style={styles.caloriesInput}
+              keyboardType="numeric"
+              value={nutrition['calories'].toString()}
+              onChangeText={(value) => handleChange('calories', value)}
+            />
+            <Text style={styles.kcalLabel}>kcal</Text>
+          </View>
+        ) : (
+          // Display
+          <Text style={styles.caloriesText}>{nutrition.calories} kcal</Text>
+        )}
 
         {['protein', 'fats', 'carbs'].map((macro) => (
           <View key={macro} style={styles.macroRow}>
@@ -120,11 +121,11 @@ return (
         ))}
       </View>
     </SafeAreaView>
-    );
+  );
 }
 
 // Styles
-const styles = StyleSheet.create({ 
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black' },
   imageContainer: {
     flex: 0.4,
@@ -196,28 +197,27 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   caloriesInput: {
-  color: '#00BFFF',
-  backgroundColor: '#222',
-  paddingHorizontal: 12,
-  paddingVertical: 8,
-  borderRadius: 8,
-  fontSize: 32,
-  fontWeight: 'bold',
-  textAlign: 'right',
-  marginBottom: 24,
-  width: 120,
-},
-caloriesInputRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 24,
-},
+    color: '#00BFFF',
+    backgroundColor: '#222',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'right',
+    marginBottom: 24,
+    width: 120,
+  },
+  caloriesInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
 
-kcalLabel: {
-  color: '#00BFFF',
-  fontSize: 24,
-  fontWeight: 'bold',
-  marginLeft: 8,
-},
-
+  kcalLabel: {
+    color: '#00BFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
 });

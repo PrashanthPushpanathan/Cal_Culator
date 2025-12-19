@@ -42,22 +42,22 @@ export const storePhoto = async (originalUri: string): Promise<void> => {
     const newUri = folder + filename;
     await FileSystem.copyAsync({ from: originalUri, to: newUri });
 
-    const analysedImage = await ImageAnalyzer.analyseImage(newUri)
+    const analysedImage = await ImageAnalyzer.analyseImage(newUri);
 
     const newPhoto: PhotoItem = {
       key: filename,
       uri: newUri,
       nutrition: {
-        calories:  analysedImage.calories,
+        calories: analysedImage.calories,
         protein: analysedImage.protein,
         fats: analysedImage.fat,
         carbs: analysedImage.carbohydrates,
       },
     };
-    
+
     const current = await getPhotos();
     const updated = [newPhoto, ...current];
-    
+
     // Speichere neue Liste
 
     await AsyncStorage.setItem(PHOTOS_KEY, JSON.stringify(updated));
@@ -71,7 +71,7 @@ export const storePhoto = async (originalUri: string): Promise<void> => {
 export const deletePhoto = async (key: string): Promise<void> => {
   try {
     const current = await getPhotos();
-    const updated = current.filter(photo => photo.key !== key);
+    const updated = current.filter((photo) => photo.key !== key);
     await AsyncStorage.setItem(PHOTOS_KEY, JSON.stringify(updated));
 
     const photoPath = `${FileSystem.documentDirectory}photos/${key}`;

@@ -1,0 +1,32 @@
+module.exports = {
+    root: true,
+    env: {
+        es2021: true,
+        node: true,
+        browser: true,
+    },
+    parser: '@typescript-eslint/parser',
+    parserOptions: {
+        ecmaVersion: 2021,
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+    },
+    extends: [
+        '@react-native-community',
+        'plugin:@typescript-eslint/recommended',
+    ],
+    plugins: ['@typescript-eslint'],
+    ignorePatterns: [
+        'node_modules/',
+        'android/',
+        'ios/',
+        '.expo/',
+        'dist/',
+        'build/',
+        '.eslintrc.js',
+    ],
+    rules: {
+        'prettier/prettier': 'off',
+        'react/react-in-jsx-scope': 'off',
+    },
+};
