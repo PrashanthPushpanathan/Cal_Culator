@@ -73,8 +73,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🛠 Expo Abhängigkeiten prüfen & korrigieren
-        run: npx expo install --check
+      - name: 🛠 Expo-Abhängigkeiten automatisch korrigieren
+        run: npx expo install --fix
 
       - name: 🛠 Android Native-Dateien generieren (Prebuild)
         run: npx expo prebuild --platform android --no-install --non-interactive
@@ -85,6 +85,7 @@ jobs:
           api-level: 34
           build-tools: 34.0.0
 
+      # DEVELOPMENT BUILD (DEV APK)
       - name: 📦 Dev-APK erstellen (assembleDebug)
         if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev'
         run: |
@@ -95,6 +96,7 @@ jobs:
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
 
+      # PRODUCTION BUILD (PROD AAB & APK)
       - name: 📦 Prod-Release erstellen (bundleRelease + assembleRelease)
         if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'prod'
         run: |
