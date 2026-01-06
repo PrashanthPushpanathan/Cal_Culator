@@ -1,18 +1,14 @@
 pluginManagement {
-  repositories {
-    google()
-    maven {
-      url = uri("https://repo1.maven.org/maven2")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
-    gradlePluginPortal()
-  }
-
-  // React Native Gradle Plugin
-  includeBuild("../node_modules/@react-native/gradle-plugin")
-
-  // Expo Autolinking / Gradle-Plugin
-  includeBuild("../node_modules/expo-modules-autolinking/android/expo-gradle-plugin")
 }
+
+// Expo ve React Native eklentilerini projeye dahil etme
+includeBuild("../node_modules/@react-native/gradle-plugin")
+includeBuild("../node_modules/expo-modules-autolinking/android/expo-gradle-plugin")
 
 rootProject.name = "android"
 include(":app")
