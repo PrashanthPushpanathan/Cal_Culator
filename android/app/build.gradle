@@ -1,6 +1,5 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
-apply plugin: "expo"
 
 android {
     namespace "com.ppu140818.CalCulator"
