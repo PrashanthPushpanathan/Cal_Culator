@@ -67,13 +67,6 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: 🧰 Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle' # Kütüphanelerin tekrar tekrar indirilmesini ve 403 hatalarını engeller
-
       - name: Set API Key in app.json
         run: |
           jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
@@ -81,14 +74,23 @@ jobs:
       - name: 📦 Install JS dependencies
         run: npm ci
 
+      # ÖNCE: Android dosyalarını oluşturuyoruz (Prebuild)
+      - name: 🧱 Prebuild Android project (Expo)
+        run: npx expo prebuild --platform android --non-interactive --clean
+
+      # SONRA: Java'yı kuruyoruz (Artık .gradle dosyalarını bulabilir)
+      - name: 🧰 Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle' 
+
       - name: 🧰 Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           api-level: 34
           build-tools: 34.0.0
-
-      - name: 🧱 Prebuild Android project (Expo)
-        run: npx expo prebuild --platform android --non-interactive --clean
 
       # DEV APK (debug)
       - name: 📦 Build Dev APK (assembleDebug)
@@ -138,3 +140,4 @@ jobs:
           files: dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 
