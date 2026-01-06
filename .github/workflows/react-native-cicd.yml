@@ -82,9 +82,6 @@ jobs:
           arch: x86_64
           build-tools: 34.0.0
 
-      - name: 🧱 Prebuild Android project (Expo)
-        run: |
-          npx expo prebuild --platform android --non-interactive --clean
       # DEV APK (debug)
       - name: 📦 Build Dev APK (assembleDebug)
         if: github.event_name == 'push' ||
