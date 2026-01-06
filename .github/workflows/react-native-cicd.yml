@@ -90,7 +90,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew :app:assembleDebug
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
