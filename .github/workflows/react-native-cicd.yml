@@ -46,6 +46,7 @@ jobs:
       github.ref == 'refs/heads/main' ||
       github.ref == 'refs/heads/master' ||
       github.ref == 'refs/heads/tempdev_pp' ||
+      github.ref == 'refs/heads/Code_Checks_pp' ||
       startsWith(github.ref, 'refs/tags/')
       )
       ) ||
