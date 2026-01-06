@@ -12,5 +12,5 @@ includeBuild("../node_modules/expo-modules-autolinking/android/expo-gradle-plugi
 rootProject.name = "android"
 include(":app")
 
-apply from: new File(["node_modules", "expo", "scripts", "autolinking.gradle"].join(File.separator))
+apply from: new File(["..", "node_modules", "expo", "scripts", "autolinking.gradle"].join(File.separator))
 useExpoModules()

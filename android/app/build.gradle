@@ -1,19 +1,17 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
-apply plugin: "expo" 
+apply plugin: "expo"
 
 android {
-    namespace "com.yourprojectname" 
+    namespace "com.ppu140818.CalCulator"
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.yourprojectname"
+        applicationId "com.ppu140818.CalCulator"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
-
-        resValue "string", "gpt_token", "REPLACE_ME_IF_NEEDED"
     }
 
     signingConfigs {
@@ -23,22 +21,10 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        release {
-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
-                storeFile file(MYAPP_RELEASE_STORE_FILE)
-                storePassword MYAPP_RELEASE_STORE_PASSWORD
-                keyAlias MYAPP_RELEASE_KEY_ALIAS
-                keyPassword MYAPP_RELEASE_KEY_PASSWORD
-            }
-        }
     }
 
     buildTypes {
-        debug {
-            signingConfig signingConfigs.debug
-        }
         release {
-            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -55,4 +41,4 @@ dependencies {
     }
 }
 
-apply from: new File(["node_modules", "expo", "scripts", "autolinking.gradle"].join(File.separator))
+apply from: new File(["..", "..", "node_modules", "expo", "scripts", "autolinking.gradle"].join(File.separator))
