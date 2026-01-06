@@ -53,10 +53,6 @@ jobs:
       github.event_name == 'workflow_dispatch'
   
     runs-on: ubuntu-latest
-    env:
-      CI: 1
-      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
-
     steps:
       - name: 🏗 Checkout repository
         uses: actions/checkout@v4
@@ -65,62 +61,53 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Set API Key in app.json
         run: |
           jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
-
       - name: 📦 Install JS dependencies
         run: npm ci
-
-      - name: 🧱 Prebuild Android project (Expo)
-        run: npx expo prebuild --platform android --non-interactive --clean
-
-      # CERRAHİ YAMA: Dosya yapısını bozmadan tüm depo bloklarına mirror ekler.
-      - name: 🛠️ Surgical Patch for 403 Forbidden
-        run: |
-          echo "Surgical patching of Gradle files..."
-          # Her 'repositories {' satırından hemen sonra çalışan bir mirror adresi ekler.
-          # Bu yöntem 'At most, one pluginManagement' hatasını tetiklemez.
-          find android -name "*.gradle" -type f -exec sed -i '/repositories {/a \        maven { url "https://repo1.maven.org/maven2/" }' {} +
-          find android -name "*.gradle" -type f -exec sed -i '/repositories {/a \        maven { url "https://plugins.gradle.org/m2/" }' {} +
-          echo "Patching complete."
 
       - name: 🧰 Setup Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-          cache: 'gradle' 
 
       - name: 🧰 Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           api-level: 34
+          target: default
+          arch: x86_64
           build-tools: 34.0.0
 
-      # DEV APK
+      - name: 🧱 Prebuild Android project (Expo)
+        run: |
+          npx expo prebuild --platform android --non-interactive --clean
+      # DEV APK (debug)
       - name: 📦 Build Dev APK (assembleDebug)
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'push' ||
+          github.event.inputs.buildType == 'all' ||
+          github.event.inputs.buildType == 'dev'
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
-
-      # PROD release
+      # PROD release (AAB + APK)
       - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'push' ||
+          github.event.inputs.buildType == 'all' ||
+          github.event.inputs.buildType == 'prod'
         run: |
           cd android
-          ./gradlew bundleRelease assembleRelease --no-daemon --stacktrace
+          ./gradlew bundleRelease assembleRelease
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
           cp android/app/build/outputs/apk/release/app-release.apk build-artifacts/app-prod.apk
-
       - name: 📤 Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -132,12 +119,14 @@ jobs:
     needs: android-build
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: android-builds
           path: dist
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
