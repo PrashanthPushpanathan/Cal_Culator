@@ -89,10 +89,12 @@ jobs:
           github.event.inputs.buildType == 'dev'
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
+
       # PROD release (AAB + APK)
       - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
         if: github.event_name == 'push' ||
