@@ -6,9 +6,11 @@ pluginManagement {
     }
 }
 
-// Expo ve React Native eklentilerini projeye dahil etme
 includeBuild("../node_modules/@react-native/gradle-plugin")
 includeBuild("../node_modules/expo-modules-autolinking/android/expo-gradle-plugin")
 
 rootProject.name = "android"
 include(":app")
+
+apply from: new File(["node_modules", "expo", "scripts", "autolinking.gradle"].join(File.separator))
+useExpoModules()
