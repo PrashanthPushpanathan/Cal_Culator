@@ -60,7 +60,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: ⚙️ API-Key in app.json setzen
+      - name: ⚙️ API-Key in app.json konfigurieren
         run: |
           jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
 
@@ -73,8 +73,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: 🛠 Expo Abhängigkeiten prüfen & korrigieren
+        run: npx expo install --check
+
       - name: 🛠 Android Native-Dateien generieren (Prebuild)
-        run: npx expo prebuild --platform android --no-install
+        run: npx expo prebuild --platform android --no-install --non-interactive
 
       - name: 🧰 Android SDK konfigurieren
         uses: android-actions/setup-android@v3
@@ -87,17 +90,17 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew :app:assembleDebug
+          ./gradlew :app:assembleDebug --no-daemon
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
 
-      - name: 📦 Prod-Release erstellen (AAB + APK)
+      - name: 📦 Prod-Release erstellen (bundleRelease + assembleRelease)
         if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'prod'
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew bundleRelease assembleRelease
+          ./gradlew bundleRelease assembleRelease --no-daemon
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
