@@ -77,15 +77,15 @@ jobs:
       - name: 🧱 Prebuild Android project (Expo)
         run: npx expo prebuild --platform android --non-interactive --clean
 
-      # KRİTİK ADIM: Maven Central 403 hatasını aşmak için tüm .gradle dosyalarını mirror (ayna) adreslerle güncelliyoruz.
-      - name: 🛠️ Fix 403 Forbidden with Hard Patch
+      # CERRAHİ YAMA: Dosya yapısını bozmadan tüm depo bloklarına mirror ekler.
+      - name: 🛠️ Surgical Patch for 403 Forbidden
         run: |
-          echo "Replacing blocked Maven Central URLs with working mirrors..."
-          # Tüm .gradle ve .gradle.kts dosyalarındaki mavenCentral() komutlarını repo1 mirror'ı ile değiştirir
-          find android -name "*.gradle" -type f -exec sed -i 's/mavenCentral()/maven { url "https:\/\/repo1.maven.org\/maven2\/" }/g' {} +
-          # Bazı durumlarda settings.gradle içinde Google deposunun da üzerinden geçmek gerekebilir
-          find android -name "settings.gradle" -type f -exec sed -i 's/google()/google(); maven { url "https:\/\/maven.google.com" }/g' {} +
-          echo "Patch applied successfully."
+          echo "Surgical patching of Gradle files..."
+          # Her 'repositories {' satırından hemen sonra çalışan bir mirror adresi ekler.
+          # Bu yöntem 'At most, one pluginManagement' hatasını tetiklemez.
+          find android -name "*.gradle" -type f -exec sed -i '/repositories {/a \        maven { url "https://repo1.maven.org/maven2/" }' {} +
+          find android -name "*.gradle" -type f -exec sed -i '/repositories {/a \        maven { url "https://plugins.gradle.org/m2/" }' {} +
+          echo "Patching complete."
 
       - name: 🧰 Setup Java 17
         uses: actions/setup-java@v4
@@ -105,7 +105,7 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
@@ -115,7 +115,7 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           cd android
-          ./gradlew bundleRelease assembleRelease --no-daemon
+          ./gradlew bundleRelease assembleRelease --no-daemon --stacktrace
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
