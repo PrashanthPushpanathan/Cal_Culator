@@ -3,9 +3,7 @@
 buildscript {
   repositories {
     google()
-    maven {
-      url = uri("https://repo1.maven.org/maven2")
-    }
+    mavenCentral()
   }
   dependencies {
     classpath('com.android.tools.build:gradle')
@@ -13,7 +11,6 @@ buildscript {
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
   }
 }
-
 
 def reactNativeAndroidDir = new File(
   providers.exec {
@@ -31,9 +28,7 @@ allprojects {
     }
 
     google()
-    maven {
-      url = uri("https://repo1.maven.org/maven2")
-    }
+    mavenCentral()
     maven { url 'https://www.jitpack.io' }
   }
 }
