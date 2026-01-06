@@ -1,0 +1,112 @@
+name: React Native Android CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - tempdev_pp
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - "docs/**"
+  pull_request:
+    branches:
+      - main
+      - master
+      - tempdev_pp
+  workflow_dispatch:
+    inputs:
+      buildType:
+        type: choice
+        description: "Build type to run"
+        options:
+          - dev
+          - prod
+          - all
+
+env:
+  NODE_OPTIONS: --openssl-legacy-provider
+
+jobs:
+  check-skip:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - run: echo "Proceeding with workflow"
+
+  android-build:
+    needs: check-skip
+    if: >
+      (github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' ||
+         github.ref == 'refs/heads/master' ||
+         github.ref == 'refs/heads/tempdev_pp')) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🏗 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          
+      - name: Set API Key in app.json
+        run: |
+          jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
+          
+      - name: 📦 Install JS dependencies
+        run: npm ci
+
+      - name: 🧰 Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: 🧰 Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          build-tools: 34.0.0
+
+      - name: 🧱 Prebuild Android project (Expo)
+        run: |
+          npx expo prebuild --platform android --non-interactive --clean
+
+      # DEV APK (debug)
+      - name: 📦 Build Dev APK (assembleDebug)
+        if: github.event_name == 'push' ||
+            github.event.inputs.buildType == 'all' ||
+            github.event.inputs.buildType == 'dev'
+        run: |
+          cd android
+          ./gradlew assembleDebug
+          cd ..
+          mkdir -p build-artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
+
+      # PROD release (AAB + APK)
+      - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
+        if: github.event_name == 'push' ||
+            github.event.inputs.buildType == 'all' ||
+            github.event.inputs.buildType == 'prod'
+        run: |
+          cd android
+          ./gradlew bundleRelease assembleRelease
+          cd ..
+          mkdir -p build-artifacts
+          cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
+          cp android/app/build/outputs/apk/release/app-release.apk build-artifacts/app-prod.apk
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds
+          path: build-artifacts/*
+          retention-days: 7
