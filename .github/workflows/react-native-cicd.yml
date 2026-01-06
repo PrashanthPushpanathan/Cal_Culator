@@ -51,11 +51,12 @@ jobs:
       )
       ) ||
       github.event_name == 'workflow_dispatch'
-  
+
     runs-on: ubuntu-latest
     env:
       CI: 1
-      
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dorg.gradle.parallel=false
+
     steps:
       - name: 🏗 Checkout repository
         uses: actions/checkout@v4
@@ -64,6 +65,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+
+      - name: 🧰 Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle' # Kütüphanelerin tekrar tekrar indirilmesini ve 403 hatalarını engeller
 
       - name: Set API Key in app.json
         run: |
@@ -72,44 +81,31 @@ jobs:
       - name: 📦 Install JS dependencies
         run: npm ci
 
-      - name: 🧰 Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
       - name: 🧰 Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           api-level: 34
-          target: default
-          arch: x86_64
           build-tools: 34.0.0
 
       - name: 🧱 Prebuild Android project (Expo)
-        run: |
-          npx expo prebuild --platform android --non-interactive --clean
+        run: npx expo prebuild --platform android --non-interactive --clean
 
       # DEV APK (debug)
       - name: 📦 Build Dev APK (assembleDebug)
-        if: github.event_name == 'push' ||
-          github.event.inputs.buildType == 'all' ||
-          github.event.inputs.buildType == 'dev'
+        if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev'
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon --stacktrace
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
 
       # PROD release (AAB + APK)
       - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
-        if: github.event_name == 'push' ||
-          github.event.inputs.buildType == 'all' ||
-          github.event.inputs.buildType == 'prod'
+        if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'prod'
         run: |
           cd android
-          ./gradlew bundleRelease assembleRelease
+          ./gradlew bundleRelease assembleRelease --no-daemon --stacktrace
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
