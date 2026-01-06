@@ -72,9 +72,9 @@ jobs:
           ./gradlew bundleRelease assembleRelease
           cd ..
           mv android/app/build/outputs/apk/release/app-release.apk \
-             dist/${APP_NAME}_prod_${VERSION}.apk
+             dist/${APP_NAME}_${VERSION}.apk
           mv android/app/build/outputs/bundle/release/app-release.aab \
-             dist/${APP_NAME}_prod_${VERSION}.aab
+             dist/${APP_NAME}_${VERSION}.aab
 
       - name: 🚀 Attach assets to the published GitHub Release
         uses: softprops/action-gh-release@v2
