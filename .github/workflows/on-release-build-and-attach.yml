@@ -12,24 +12,22 @@ env:
   APP_NAME: Cal-Culator
 
 jobs:
-  build-and-attach:
+  prepare-build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧾 Checkout tag for this release
+      - name: 🏗 Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name }}
 
       - name: 🏗 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
+          
       - name: Set API Key in app.json
         run: |
           jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
-
+          
       - name: 📦 Install JS dependencies
         run: npm ci
 
@@ -46,6 +44,22 @@ jobs:
           target: default
           arch: x86_64
           build-tools: 34.0.0
+
+      - name: 🧱 Prebuild Android project (Expo)
+        run: |
+          npx expo prebuild --platform android --non-interactive --clean
+
+  build:
+    needs: prepare-build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout tag for this release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+
 
       # DEV APK (pre-release)
       - name: 📦 Build Dev APK (pre-release)
