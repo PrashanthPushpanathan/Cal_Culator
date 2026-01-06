@@ -6,11 +6,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { storePhoto } from '../utils/storage';
 
+// OpenCamera page: allows user to take a picture or pick an image from the gallery
 export default function OpenCamera() {
   const cameraRef = useRef<CameraView>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [facing, setFacing] = useState<'front' | 'back'>('back');
 
+    // Check for camera permissions
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -18,6 +20,7 @@ export default function OpenCamera() {
     })();
   }, []);
 
+   // Function to take a picture and save it
   const takePictureAndSave = async () => {
     if (!cameraRef.current) {
       Alert.alert('Error', 'Camera not ready');
@@ -38,6 +41,7 @@ export default function OpenCamera() {
     }
   };
 
+    // Function to pick an image from the phone gallery and save it
   const pickImageFromLibrary = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -58,6 +62,7 @@ export default function OpenCamera() {
     }
   };
 
+    // Render the camera view or permission status
   if (hasPermission === null) {
     return <View style={styles.container}><Text>Requesting permission...</Text></View>;
   }
@@ -66,6 +71,7 @@ export default function OpenCamera() {
     return <View style={styles.container}><Text>Camera permission denied</Text></View>;
   }
 
+    // View
   return (
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
@@ -99,6 +105,7 @@ export default function OpenCamera() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: { flex: 1 },
   camera: { flex: 1 },

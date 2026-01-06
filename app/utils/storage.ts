@@ -2,8 +2,10 @@ import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageAnalyzer } from './ImageAnalyzer';
 
+// Key for AsyncStorage
 const PHOTOS_KEY = 'SAVED_PHOTOS';
 
+// Define the structure of a photo item
 export type PhotoItem = {
   key: string;
   uri: string;
@@ -15,6 +17,8 @@ export type PhotoItem = {
   };
 };
 
+
+// get Photo form AsyncStorage
 export const getPhotos = async (): Promise<PhotoItem[]> => {
   try {
     const json = await AsyncStorage.getItem(PHOTOS_KEY);
@@ -25,6 +29,7 @@ export const getPhotos = async (): Promise<PhotoItem[]> => {
   }
 };
 
+// store Photo in AsyncStorage and analyze it to get nutrition info
 export const storePhoto = async (originalUri: string): Promise<void> => {
   try {
     const filename = `${Date.now()}.jpg`;
@@ -44,15 +49,13 @@ export const storePhoto = async (originalUri: string): Promise<void> => {
       key: filename,
       uri: newUri,
       nutrition: {
-        calories:  analysedImage.calories,//Math.floor(Math.random() * 500) + 300,
-        protein: analysedImage.protein,//Math.floor(Math.random() * 50) + 10,
-        fats: analysedImage.fat,//Math.floor(Math.random() * 30) + 5,
-        carbs: analysedImage.carbohydrates,//Math.floor(Math.random() * 100) + 20,
+        calories:  analysedImage.calories,
+        protein: analysedImage.protein,
+        fats: analysedImage.fat,
+        carbs: analysedImage.carbohydrates,
       },
     };
     
-    
-
     const current = await getPhotos();
     const updated = [newPhoto, ...current];
     
@@ -65,6 +68,7 @@ export const storePhoto = async (originalUri: string): Promise<void> => {
   }
 };
 
+// delete Photo from AsyncStorage and file system
 export const deletePhoto = async (key: string): Promise<void> => {
   try {
     const current = await getPhotos();

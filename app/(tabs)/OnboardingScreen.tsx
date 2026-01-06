@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 
+// OnboardingScreen page: allows user to calculate personal goals with age, height, weight, and goal weight
 const OnboardingScreen = () => {
   const [age, setAge] = useState<number>(25);
   const [height, setHeight] = useState<number>(170);
@@ -10,6 +11,7 @@ const OnboardingScreen = () => {
   const [goalWeight, setGoalWeight] = useState<number>(75);
   const router = useRouter();
 
+  // Function to calculate personal goals
   const handleCalculate = () => {
     const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
     const isGaining = goalWeight > weight;
@@ -30,6 +32,7 @@ const OnboardingScreen = () => {
     const totalKcalNeeded = weightDifference * kcalPerKg;
     const estimatedDays = Math.ceil(totalKcalNeeded / kcalChangePerDay);
 
+    // Navigate to GalleryScreen with calculated params
     router.push({
       pathname: '/(tabs)/GalleryScreen',
       params: {
@@ -42,6 +45,7 @@ const OnboardingScreen = () => {
     });
   };
 
+    // View
   return (
     <View style={styles.container}>
       <View style={styles.inputsContainer}>
@@ -101,6 +105,7 @@ const OnboardingScreen = () => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,

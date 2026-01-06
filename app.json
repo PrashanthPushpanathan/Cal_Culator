@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ppu140818.CalCulator"
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +39,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "GptToken": "",
+      "router": {},
+      "eas": {
+        "slug": "Cal-Culator",
+        "projectId": "9de89a78-6872-4ccc-b45f-74b497c3a7dc"
+      }
     }
   }
 }
