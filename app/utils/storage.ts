@@ -17,6 +17,7 @@ export type PhotoItem = {
   };
 };
 
+
 // get Photo form AsyncStorage
 export const getPhotos = async (): Promise<PhotoItem[]> => {
   try {
