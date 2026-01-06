@@ -22,7 +22,7 @@ on:
     inputs:
       buildType:
         type: choice
-        description: 'Build type to run'
+        description: 'Wählen Sie den Build-Typ aus'
         options:
           - dev
           - prod
@@ -36,61 +36,54 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
-      - run: echo "Proceeding with workflow"
+      - run: echo "CI-Prozess wird gestartet..."
 
   android-build:
     needs: [check-skip]
     if: >
       (github.event_name == 'push' &&
-      (
-      github.ref == 'refs/heads/main' ||
-      github.ref == 'refs/heads/master' ||
-      github.ref == 'refs/heads/tempdev_pp' ||
-      github.ref == 'refs/heads/Code_Checks_pp' ||
-      startsWith(github.ref, 'refs/tags/')
-      )
-      ) ||
+      (github.ref == 'refs/heads/main' ||
+       github.ref == 'refs/heads/master' ||
+       github.ref == 'refs/heads/tempdev_pp' ||
+       github.ref == 'refs/heads/Code_Checks_pp' ||
+       startsWith(github.ref, 'refs/tags/'))) ||
       github.event_name == 'workflow_dispatch'
   
     runs-on: ubuntu-latest
     steps:
-      - name: 🏗 Checkout repository
+      - name: 🏗 Repository auschecken
         uses: actions/checkout@v4
 
-      - name: 🏗 Setup Node.js
+      - name: 🏗 Node.js einrichten
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: ⚙️ Set API Key in app.json
+      - name: ⚙️ API-Key in app.json setzen
         run: |
           jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
 
-      - name: 📦 Install JS dependencies
+      - name: 📦 JS-Abhängigkeiten installieren
         run: npm ci
 
-      - name: 🧰 Setup Java 17
+      - name: 🧰 Java 17 einrichten
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '17'
 
-      - name: 🛠 Generate Android Native Files (Prebuild)
+      - name: 🛠 Android Native-Dateien generieren (Prebuild)
         run: npx expo prebuild --platform android --no-install
 
-      - name: 🧰 Setup Android SDK
+      - name: 🧰 Android SDK konfigurieren
         uses: android-actions/setup-android@v3
         with:
           api-level: 34
-          target: default
-          arch: x86_64
           build-tools: 34.0.0
 
-      # DEV APK (debug)
-      - name: 📦 Build Dev APK (assembleDebug)
-        if: github.event_name == 'push' ||
-          github.event.inputs.buildType == 'all' ||
-          github.event.inputs.buildType == 'dev'
+      - name: 📦 Dev-APK erstellen (assembleDebug)
+        if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev'
         run: |
           cd android
           chmod +x gradlew
@@ -99,11 +92,8 @@ jobs:
           mkdir -p build-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/app-dev-debug.apk
 
-      # PROD release (AAB + APK)
-      - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
-        if: github.event_name == 'push' ||
-          github.event.inputs.buildType == 'all' ||
-          github.event.inputs.buildType == 'prod'
+      - name: 📦 Prod-Release erstellen (AAB + APK)
+        if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'prod'
         run: |
           cd android
           chmod +x gradlew
@@ -113,7 +103,7 @@ jobs:
           cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
           cp android/app/build/outputs/apk/release/app-release.apk build-artifacts/app-prod.apk
 
-      - name: 📤 Upload build artifacts
+      - name: 📤 Build-Artefakte hochladen
         uses: actions/upload-artifact@v4
         with:
           name: android-builds
@@ -124,15 +114,14 @@ jobs:
     needs: android-build
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Download build artifacts
+      - name: 📥 Artefakte herunterladen
         uses: actions/download-artifact@v4
         with:
           name: android-builds
           path: dist
 
-      - name: 🚀 Create GitHub Release
+      - name: 🚀 GitHub Release erstellen
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
