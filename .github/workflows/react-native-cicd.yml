@@ -62,9 +62,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Set API Key in app.json
+      - name: ⚙️ Set API Key in app.json
         run: |
           jq '.expo.extra.GptToken = "${{ secrets.GPT_TOKEN }}"' app.json > temp.json && mv temp.json app.json
+
       - name: 📦 Install JS dependencies
         run: npm ci
 
@@ -73,6 +74,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: 🛠 Generate Android Native Files (Prebuild)
+        run: npx expo prebuild --platform android --no-install
 
       - name: 🧰 Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -102,11 +106,13 @@ jobs:
           github.event.inputs.buildType == 'prod'
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew bundleRelease assembleRelease
           cd ..
           mkdir -p build-artifacts
           cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/app-prod.aab
           cp android/app/build/outputs/apk/release/app-release.apk build-artifacts/app-prod.apk
+
       - name: 📤 Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -120,13 +126,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download build artifacts
+      - name: 📥 Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: android-builds
           path: dist
 
-      - name: Create GitHub Release
+      - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
