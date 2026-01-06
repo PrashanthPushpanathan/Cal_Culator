@@ -51,7 +51,7 @@ jobs:
       )
       ) ||
       github.event_name == 'workflow_dispatch'
-
+  
     runs-on: ubuntu-latest
     env:
       CI: 1
@@ -74,11 +74,17 @@ jobs:
       - name: 📦 Install JS dependencies
         run: npm ci
 
-      # ÖNCE: Android dosyalarını oluşturuyoruz (Prebuild)
       - name: 🧱 Prebuild Android project (Expo)
         run: npx expo prebuild --platform android --non-interactive --clean
 
-      # SONRA: Java'yı kuruyoruz (Artık .gradle dosyalarını bulabilir)
+      # KRİTİK ADIM: 403 Hatasını Çözmek İçin Yama (Patch)
+      - name: 🛠️ Patch Gradle Settings (Fix 403 Forbidden)
+        run: |
+          # Bu komut, Foojay resolver'ın GSON bağımlılığını çekemediği depolara alternatif ekler
+          echo "Fixing repositories in settings.gradle..."
+          sed -i '1i pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }' android/settings.gradle
+          sed -i 's/mavenCentral()/mavenCentral(); maven { url "https:\/\/repo1.maven.org\/maven2\/" }/g' android/build.gradle
+
       - name: 🧰 Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -94,7 +100,7 @@ jobs:
 
       # DEV APK (debug)
       - name: 📦 Build Dev APK (assembleDebug)
-        if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'dev'
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
@@ -104,7 +110,7 @@ jobs:
 
       # PROD release (AAB + APK)
       - name: 📦 Build Prod Release (bundleRelease + assembleRelease)
-        if: github.event_name == 'push' || github.event.inputs.buildType == 'all' || github.event.inputs.buildType == 'prod'
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           cd android
           ./gradlew bundleRelease assembleRelease --no-daemon --stacktrace
@@ -124,14 +130,12 @@ jobs:
     needs: android-build
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: android-builds
           path: dist
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -140,4 +144,3 @@ jobs:
           files: dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- 
