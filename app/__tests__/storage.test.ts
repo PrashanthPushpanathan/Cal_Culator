@@ -22,7 +22,7 @@ jest.mock('expo-file-system', () => ({
   deleteAsync: jest.fn(),
 }));
 // ImageAnalyzer mocken
-jest.mock('../utils/imageAnalyzer', () => ({
+jest.mock('../utils/ImageAnalyzer', () => ({
   ImageAnalyzer: {
     analyseImage: jest.fn(),
   },
