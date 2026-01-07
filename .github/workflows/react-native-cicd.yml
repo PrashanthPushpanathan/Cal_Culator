@@ -36,8 +36,43 @@ jobs:
     steps:
       - run: echo "Proceeding with workflow"
 
-  android-build:
+  lint-and-format:
     needs: check-skip
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: |
+          OUTPUT=$(npx eslint . --format json 2>/dev/null || true)
+          ERRORS=$(echo "$OUTPUT" | jq '[.[].errorCount] | add // 0')
+          WARNINGS=$(echo "$OUTPUT" | jq '[.[].warningCount] | add // 0')
+          TOTAL=$(echo "$OUTPUT" | jq 'length')
+          echo "Files scanned: $TOTAL"
+          echo "Errors: $ERRORS"
+          echo "Warnings: $WARNINGS"
+          npx eslint .
+
+      - name: Run Prettier
+        run: |
+          OUTPUT=$(npx prettier --check . 2>&1 || true)
+          TOTAL=$(echo "$OUTPUT" | grep -c "Checking" || find . -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) -not -path "./node_modules/*" | wc -l)
+          ISSUES=$(echo "$OUTPUT" | grep -c "\[warn\]" || echo "0")
+          echo "Files checked: $TOTAL"
+          echo "Files with issues: $ISSUES"
+          npx prettier --check .
+
+  android-build:
+    needs: [check-skip, lint-and-format]
     if: >
       (github.event_name == 'push' &&
         (github.ref == 'refs/heads/main' ||
