@@ -64,12 +64,22 @@ jobs:
 
       - name: Run Prettier
         run: |
-          OUTPUT=$(npx prettier --check .)
-          TOTAL=$(echo "$OUTPUT" | grep -c "Checking" || find . -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) -not -path "./node_modules/*" | wc -l)
-          ISSUES=$(echo "$OUTPUT" | grep -c "\[warn\]" || echo "0")
+          set -o pipefail
+      
+          OUTPUT=$(npx prettier --check . 2>&1) || STATUS=$?
+          STATUS=${STATUS:-0}
+      
+          TOTAL=$(find . -type f \( \
+            -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \
+          \) -not -path "./node_modules/*" | wc -l)
+      
+          ISSUES=$(printf '%s\n' "$OUTPUT" | grep -c "\[warn\]" || true)
+      
+          echo "$OUTPUT"
           echo "Files checked: $TOTAL"
           echo "Files with issues: $ISSUES"
-          npx prettier --check .
+      
+          exit $STATUS
 
   android-build:
     needs: [check-skip, lint-and-format]
