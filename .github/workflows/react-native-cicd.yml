@@ -6,6 +6,7 @@ on:
       - main
       - master
       - tempdev_pp
+      - develop
     paths-ignore:
       - "**.md"
       - "LICENSE"
@@ -78,7 +79,8 @@ jobs:
       - name: 🧱 Prebuild Android project (Expo)
         run: |
           npx expo prebuild --platform android --non-interactive --clean
-
+      - name: Run unit tests
+        run: npm test
       # DEV APK (debug)
       - name: 📦 Build Dev APK (assembleDebug)
         if: github.event_name == 'push' ||
