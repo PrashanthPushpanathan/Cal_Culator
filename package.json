@@ -10,11 +10,16 @@
     "web": "expo start --web",
     "test": "jest",
     "test:ci": "jest --ci --runInBand --coverage",
-    "lint": "expo lint"
+    "lint": "eslint . -c .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . -c .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "jest": {
     "preset": "jest-expo",
-    "testMatch": [ "**/__tests__/**/*.test.[jt]s?(x)" ],
+    "testMatch": [
+      "**/__tests__/**/*.test.[jt]s?(x)"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!(@react-native|react-native|expo|expo-.*|@expo|@react-navigation)/)"
     ]
@@ -59,12 +64,20 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@eslint/js": "^9.39.2",
+    "@react-native-community/eslint-config": "^3.2.0",
     "@types/jest": "^29.5.12",
     "@types/react": "~19.0.10",
     "@types/react-test-renderer": "^18.3.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^17.0.0",
     "jest": "^29.2.1",
     "jest-expo": "~53.0.4",
-    "typescript": "^5.3.3"
+    "prettier": "^3.7.4",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.52.0"
   },
   "private": true
 }
