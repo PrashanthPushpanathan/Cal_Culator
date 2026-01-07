@@ -8,11 +8,16 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest --watchAll",
+    "test": "jest",
+    "test:ci": "jest --ci --runInBand --coverage",
     "lint": "expo lint"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "testMatch": [ "**/__tests__/**/*.test.[jt]s?(x)" ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@react-native|react-native|expo|expo-.*|@expo|@react-navigation)/)"
+    ]
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
