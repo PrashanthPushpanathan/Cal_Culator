@@ -10,10 +10,10 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="GalleryScreen">
-        <Stack.Screen 
-          name="GalleryScreen" 
-          component={GalleryScreen} 
-          options={{ headerShown: false }} 
+        <Stack.Screen
+          name="GalleryScreen"
+          component={GalleryScreen}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

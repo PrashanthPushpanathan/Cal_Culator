@@ -45,7 +45,7 @@ const OnboardingScreen = () => {
     });
   };
 
-    // View
+  // View
   return (
     <View style={styles.container}>
       <View style={styles.inputsContainer}>

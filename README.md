@@ -1,6 +1,7 @@
 # CalCulator
 
 ## Was ist CalCulator
+
 Lerne mehr über Cal-Culator im [Wiki](https://github.com/PrashanthPushpanathan/Cal_Culator/wiki).
 
 CalCulator ist eine mobile Anwendung zur Ernährungsanalyse. Sie ermöglicht es Benutzern, Lebensmittel zu scannen oder manuell einzugeben, um Nährwertinformationen wie Kalorien, Proteine, Fette und Kohlenhydrate zu erhalten.
@@ -24,28 +25,36 @@ CalCulator ist eine mobile Anwendung zur Ernährungsanalyse. Sie ermöglicht es 
 - 🔐 **Login und Benutzerverwaltung:** Ein sicherer Login- und Registrierungsprozess ermöglicht es neuen Benutzern, ein Konto zu erstellen, ihre persönlichen Daten zu speichern und sich sicher anzumelden.
 
 ## Start App
+
 ### Expo
+
 [Mehr](./docs/StartExpo.md)
 
 1. **Installiere Abhängigkeiten:**
+
    ```bash
    npm install
 
+   ```
+
 2. **Starte die App:**
    `npx expo start`
-   
+
 Im Output wirst du Optionen finden, die App in einem Entwicklungsbuild, Android Emulator, iOS Simulator oder mit Expo Go zu öffnen.
 
 ## Tech Stack
+
 - **Frontend:** React Native
 - **Backend:** Node.js, OpenAI API (Bildanalyse)
 - **Datenbank:** AsyncStorage (für lokale Speicherung)
 - **Sicherheit:** JWT, OAuth 2.0, TLS/SSL Verschlüsselung
 
 ## Lizenz
+
 CalCulator ist unter der [MIT Lizenz](LICENSE) lizenziert.
 
 ## Contributing
+
 1. Forke das Repository.
 2. Erstelle einen neuen Branch für deine Änderungen (`git checkout -b feature-xyz`).
 3. Committe deine Änderungen (`git commit -am 'Add new feature'`).
@@ -53,4 +62,5 @@ CalCulator ist unter der [MIT Lizenz](LICENSE) lizenziert.
 5. Erstelle einen Pull Request.
 
 ## Kontakt
+
 Für Fragen oder Unterstützung, kontaktiere uns über das [Projekt-Repository](https://github.com/PrashanthPushpanathan/Cal_Culator).
