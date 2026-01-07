@@ -64,7 +64,7 @@ jobs:
 
       - name: Run Prettier
         run: |
-          OUTPUT=$(npx prettier --check . 2>&1 || true)
+          OUTPUT=$(npx prettier --check .)
           TOTAL=$(echo "$OUTPUT" | grep -c "Checking" || find . -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) -not -path "./node_modules/*" | wc -l)
           ISSUES=$(echo "$OUTPUT" | grep -c "\[warn\]" || echo "0")
           echo "Files checked: $TOTAL"
